@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include "MapSite.h"
 
 class MazeFactory
@@ -6,27 +5,9 @@ class MazeFactory
 public: 
     MazeFactory();
     virtual Maze* MakeMaze() const;
-    virtual Wall* MakeWall() const;
+    virtual Wall* MakeWall(Room* r1, Room* r2) const;
     virtual Room* MakeRoom(int roomNo) const;
     virtual Door* MakeDoor(Room* r1, Room* r2) const;
-};
-
-class BombedRoom: public Room
-{
-public: 
-    void bomb();
-    bool GetIsBombed() const;
-private:
-    bool is_bombed;
-};
-
-class BombedDoor: public Room
-{
-public:
-    void bomb();
-    bool GetIsBombed() const;
-private:
-    bool is_bombed;
 };
 
 class BombedMazeFactory: public MazeFactory
