@@ -2,14 +2,20 @@
 #define QUOTE_LINESIZE 1024
 #define QUOTE_BLOCKSIZE 1024
 #define QUOTE_BLOCKNUM 32768
+
 // 从文件里读取股票静态信息
 // const char* filename 文件名
 // const int date 指定日期
 // 返回首个股票信息的指针
 // 失败返回NULL
 StockInfo* read_stock_info_from_file(const char* filename, const int date);
+
 // 从文件里读取深度行情
-void read_market_data_from_file(const char* filename, MarketData* marketdata_ptr);
+// const char* filename 文件名
+// 返回首个股票深度行情信息的指针
+// 失败返回NULL
+MarketData* read_market_data_from_file(const char* filename);
+
 // 从文件里读取逐笔委托
 void read_tickbytick_order_from_file(const char* filename, TickByTick* tickbytick);
 // 从文件里读取逐笔成交
