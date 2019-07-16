@@ -1,32 +1,16 @@
-//定义行情类相关数据结构
+//定义本地行情类相关数据结构
+#include <stdint.h>
+#define STOCK_EXCHANGE_SH 1
+#define STOCK_EXCHANGE_SZ 2
 
-#ifndef _QUOTE_API_STRUCT_H_
-#define _QUOTE_API_STRUCT_H_
-
-#include "base_data_struct.h"
-
-///指定的合约
-typedef struct StockCodeStruct
-{
-    ///交易所代码
-    EXCHANGE_TYPE exchange_id;
-    ///合约代码（不包含交易所信息）例如"600000"，不带空格，以'\0'结尾
-	char	ticker[TICKER_LEN];
-} StockCode;
-
-enum MARKETDATA_TYPE {
-    MARKETDATA_ACTUAL = 0, // 现货(股票/基金/债券等)
-    MARKETDATA_OPTION = 1, // 期权
-};
-
-// 深度行情数据
-typedef struct DepthMarketData 
+///快照行情
+typedef struct SnapDataStruct
 {
     // 代码
     ///交易所代码
-    EXCHANGE_TYPE exchange_id;
+    int exchange_id;
     ///合约代码（不包含交易所信息），不带空格，以'\0'结尾
-    char	ticker[TICKER_LEN];
+    char	code[8];
 
     // 价格
 	///最新价
@@ -48,6 +32,26 @@ typedef struct DepthMarketData
 	///跌停价
 	double	lower_limit_price;
 
+    /// 时间类，格式为YYYYMMDDHHMMSSsss
+    int64_t data_time;
+
+    // 量额数据
+    ///数量，为总成交量（单位股，与交易所一致）
+    int64_t	qty;
+    ///成交金额，为总成交金额（单位元，与交易所一致）
+    double	turnover;
+    ///当日均价=(turnover/qty)
+    double	avg_price;
+} SnapData;
+
+///10档行情
+typedef struct LevelDataStruct
+{
+    // 代码
+    ///交易所代码
+    int exchange_id;
+    ///合约代码（不包含交易所信息），不带空格，以'\0'结尾
+    char	code[8];
     /// 时间类，格式为YYYYMMDDHHMMSSsss
     int64_t data_time;
 
@@ -75,25 +79,16 @@ typedef struct DepthMarketData
     // 卖一队列总委托笔数
     int max_ask1_count;
 
-    // 量额数据
-    ///数量，为总成交量（单位股，与交易所一致）
-    int64_t	qty;
-    ///成交金额，为总成交金额（单位元，与交易所一致）
-    double	turnover;
-    ///当日均价=(turnover/qty)
-    double	avg_price;
-} DepthData;
+} LevelData;
 
 ///股票行情静态信息
-struct StockStaticInfo {
+struct StockInfo {
     ///交易所代码
-    EXCHANGE_TYPE exchange_id;
+    int exchange_id;
     ///合约代码（不包含交易所信息），不带空格，以'\0'结尾
-    char    ticker[TICKER_LEN];
+    char    code[8];
     /// 合约名称
-    char    ticker_name[TICKER_NAME_LEN];
-    /// 合约类型
-	TICKER_TYPE ticker_type;
+    char    name[16];
     ///昨收盘
     double  pre_close_price;
     ///涨停板价
@@ -102,18 +97,15 @@ struct StockStaticInfo {
     double  lower_limit_price;
 	///最小变动价位
 	double  price_tick;
-    /// 合约最小交易量(买)
-    int32_t  buy_qty_unit;
-    /// 合约最小交易量(卖)
-	int32_t sell_qty_unit;
 };
 
+
 ///逐笔委托(仅适用深交所)
-struct TickByTickOrder {
+struct TickOrder {
     ///交易所代码
-    EXCHANGE_TYPE exchange_id;
+    int exchange_id;
     ///合约代码（不包含交易所信息），不带空格，以'\0'结尾
-    char ticker[TICKER_LEN];
+    char code[8];
     ///委托时间 
     int64_t data_time;
     ///委托序号(在同一个channel_no内唯一，从1开始连续)
@@ -129,11 +121,11 @@ struct TickByTickOrder {
 };
 
 ///逐笔成交
-struct TickByTickTrade {
+struct TickTrade {
     ///交易所代码
-    EXCHANGE_TYPE exchange_id;
+    int exchange_id;
     ///合约代码（不包含交易所信息），不带空格，以'\0'结尾
-    char ticker[TICKER_LEN];
+    char code[8];
     ///成交时间
     int64_t data_time;
     ///委托序号(在同一个channel_no内唯一，从1开始连续)
@@ -152,20 +144,3 @@ struct TickByTickTrade {
     /// SZ: 成交标识('4':撤; 'F':成交)
     char type;
 };
-
-///逐笔数据信息
-typedef struct TickByTickStruct {
-    ///预留
-    int64_t seq;
-    ///委托时间 or 成交时间
-    int64_t data_time;
-    ///委托 or 成交
-    TBT_TYPE type;
-
-    union {
-        TickByTickOrder     order;
-        TickByTickTrade     trade;
-    };
-} TickByTick;
-
-#endif

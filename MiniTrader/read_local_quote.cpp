@@ -22,7 +22,7 @@ void split_line_to_word_array(char* line, const char* separator, char** word_arr
         word_array[i] = NULL;
 }
 
-StockInfo* read_stock_info_from_file(const char* filename, const int date)
+StockInfo* read_stock_info_from_file(const char* filename, const int date, int *array_size)
 {
     FILE * pFile;
     char line[QUOTE_LINESIZE];
@@ -75,6 +75,7 @@ StockInfo* read_stock_info_from_file(const char* filename, const int date)
         memcpy(stockinfo_ptr + QUOTE_BLOCKSIZE * block_id, stockinfo_ptr_arr[block_id], sizeof(StockInfo) * block_size);
         delete[] stockinfo_ptr_arr[block_id];
     }
+    *array_size = total_num;
     // 末元素充值为0
     memset(stockinfo_ptr+total_num, 0, sizeof(StockInfo));
     printf("date:%d stock_num:%lu\n", date, total_num);
@@ -82,7 +83,7 @@ StockInfo* read_stock_info_from_file(const char* filename, const int date)
 }
 
 // 从文件里读取深度行情
-SnapData* read_snap_data_from_file(const char* filename)
+SnapData* read_snap_data_from_file(const char* filename, int *array_size)
 {
     FILE * pFile;
     char line[QUOTE_LINESIZE];
@@ -135,12 +136,13 @@ SnapData* read_snap_data_from_file(const char* filename)
         memcpy(snapdata_ptr + QUOTE_BLOCKSIZE * block_id, snapdata_ptr_arr[block_id], sizeof(SnapData) * block_size);
         delete[] snapdata_ptr_arr[block_id];
     }
+    *array_size = total_num;
     // 末元素充值为0
     memset(snapdata_ptr+total_num, 0, sizeof(SnapData));
     return snapdata_ptr;
 }
 
-LevelData* read_level_data_from_file(const char* filename)
+LevelData* read_level_data_from_file(const char* filename, int *array_size)
 {
     FILE * pFile;
     char line[QUOTE_LINESIZE];
@@ -192,6 +194,7 @@ LevelData* read_level_data_from_file(const char* filename)
         memcpy(leveldata_ptr + QUOTE_BLOCKSIZE * block_id, leveldata_ptr_arr[block_id], sizeof(LevelData) * block_size);
         delete[] leveldata_ptr_arr[block_id];
     }
+    *array_size = total_num;
     // 末元素充值为0
     memset(leveldata_ptr+total_num, 0, sizeof(LevelData));
     printf("get %lld level data\n", total_num);
@@ -200,7 +203,7 @@ LevelData* read_level_data_from_file(const char* filename)
 
 
 // 从文件里读取逐笔委托
-TickByTickOrder* read_tickbytick_order_from_file(const char* filename)
+TickByTickOrder* read_tick_order_from_file(const char* filename, int *array_size)
 {
     FILE * pFile;
     char line[QUOTE_LINESIZE];
@@ -252,6 +255,7 @@ TickByTickOrder* read_tickbytick_order_from_file(const char* filename)
         memcpy(tickorder_ptr + QUOTE_BLOCKSIZE * block_id, tickorder_ptr_arr[block_id], sizeof(TickByTickOrder) * block_size);
         delete[] tickorder_ptr_arr[block_id];
     }
+    *array_size = total_num;
     // 末元素充值为0
     memset(tickorder_ptr+total_num, 0, sizeof(TickByTickOrder));
     printf("get %lld level data\n", total_num);
@@ -259,7 +263,7 @@ TickByTickOrder* read_tickbytick_order_from_file(const char* filename)
 }
 
 // 从文件里读取逐笔成交
-TickByTickTrade* read_tickbytick_trade_from_file(const char* filename)
+TickByTickTrade* read_tick_trade_from_file(const char* filename, int *array_size)
 {
     FILE * pFile;
     char line[QUOTE_LINESIZE];
@@ -311,6 +315,7 @@ TickByTickTrade* read_tickbytick_trade_from_file(const char* filename)
         memcpy(ticktrade_ptr + QUOTE_BLOCKSIZE * block_id, ticktrade_ptr_arr[block_id], sizeof(TickByTickTrade) * block_size);
         delete[] ticktrade_ptr_arr[block_id];
     }
+    *array_size = total_num;
     // 末元素充值为0
     memset(ticktrade_ptr+total_num, 0, sizeof(TickByTickTrade));
     printf("get %lld level data\n", total_num);

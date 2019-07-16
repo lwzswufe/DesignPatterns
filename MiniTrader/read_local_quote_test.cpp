@@ -8,8 +8,8 @@ g++ base_data_struct.h quote_api_struct.h read_local_quote.h read_local_quote.cp
 // 测试读取股票信息
 void test_stock_info(const char * filename)
 {
-    int date = 20190110, stock_num = 0;
-    StockInfo* ptr = read_stock_info_from_file(filename, date);
+    int date = 20190110, stock_num = 0, total_num;
+    StockInfo* ptr = read_stock_info_from_file(filename, date, &total_num);
     while (ptr->pre_close_price > 0)
     {
         printf("code:%s Market:%d preclose:%.2lf\tuplimit:%.2lf\n", 
@@ -23,8 +23,8 @@ void test_stock_info(const char * filename)
 // 测试读取快照数据
 void test_snap_data(const char* filename)
 {
-    SnapData* ptr = read_snap_data_from_file(filename);
-    int data_num = 0, snapdata_flag = 1;
+    int data_num = 0, snapdata_flag = 1, total_num;
+    SnapData* ptr = read_snap_data_from_file(filename, &total_num);
     while (ptr->data_time > 0)
     {   
         data_num++;
@@ -42,8 +42,8 @@ void test_snap_data(const char* filename)
 // 测试读取10档行情数据
 void test_level_data(const char * filename)
 {
-    LevelData* ptr = read_level_data_from_file(filename);
-    int data_num = 0, leveldata_flag = 1;
+    int data_num = 0, leveldata_flag = 1, total_num;
+    LevelData* ptr = read_level_data_from_file(filename, &total_num);
     while (ptr->data_time > 0)
     {   
         data_num++;
@@ -66,8 +66,8 @@ void test_level_data(const char * filename)
 
 void test_tick_order(const char * filename)
 {
-    TickByTickOrder* ptr = read_tickbytick_order_from_file(filename);
-    int data_num = 0, flag = 1;
+    int data_num = 0, flag = 1, total_num;
+    TickByTickOrder* ptr = read_tick_order_from_file(filename, &total_num);
     while (ptr->data_time > 0)
     {   
         data_num++;
@@ -84,8 +84,8 @@ void test_tick_order(const char * filename)
 
 void test_tick_trade(const char * filename)
 {
-    TickByTickTrade* ptr = read_tickbytick_trade_from_file(filename);
-    int data_num = 0, flag = 1;
+    int data_num = 0, flag = 1, total_num;
+    TickByTickTrade* ptr = read_tick_trade_from_file(filename, &total_num);
     while (ptr->data_time > 0)
     {   
         data_num++;
