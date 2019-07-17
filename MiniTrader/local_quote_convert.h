@@ -6,14 +6,14 @@
 #include "quote_api_struct.h"
 
 // 转换股票静态信息数据
-StockStaticInfo * convert_stockinfo(StockInfo* stockinfo_ptr, bool* is_last);
+void convert_stockinfo(const StockInfo* stockinfo_ptr, StockStaticInfo * stockstaticinfo_ptr, bool* is_last);
 
 // 转换深度行情数据
-DepthData * convert_depthdata(SnapData* snap_ptr, LevelData* level_ptr);
+void convert_depthdata(const SnapData* snap_ptr, const LevelData* level_ptr, DepthData * data_ptr);
 
 // 转换委托流数据
-TickByTickStruct * convert_tickorder(TickOrder* tickorder_ptr);
+void convert_tickorder(const TickOrder* tickorder_ptr, TickByTickStruct * tick_ptr);
 
 // 转换成交流数据
-TickByTickStruct * convert_ticktrade(TickTrade* ticktrade_ptr);
+void convert_ticktrade(const TickTrade* ticktrade_ptr, TickByTickStruct * tick_ptr);
 
