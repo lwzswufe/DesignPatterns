@@ -110,10 +110,6 @@ struct StockStaticInfo {
 
 ///逐笔委托(仅适用深交所)
 struct TickByTickOrder {
-    ///交易所代码
-    EXCHANGE_TYPE exchange_id;
-    ///合约代码（不包含交易所信息），不带空格，以'\0'结尾
-    char ticker[TICKER_LEN];
     ///委托时间 
     int64_t data_time;
     ///委托序号(在同一个channel_no内唯一，从1开始连续)
@@ -130,10 +126,6 @@ struct TickByTickOrder {
 
 ///逐笔成交
 struct TickByTickTrade {
-    ///交易所代码
-    EXCHANGE_TYPE exchange_id;
-    ///合约代码（不包含交易所信息），不带空格，以'\0'结尾
-    char ticker[TICKER_LEN];
     ///成交时间
     int64_t data_time;
     ///委托序号(在同一个channel_no内唯一，从1开始连续)
@@ -155,6 +147,10 @@ struct TickByTickTrade {
 
 ///逐笔数据信息
 typedef struct TickByTickStruct {
+    ///交易所代码
+    EXCHANGE_TYPE exchange_id;
+    ///合约代码（不包含交易所信息），不带空格，以'\0'结尾
+    char ticker[TICKER_LEN];
     ///预留
     int64_t seq;
     ///委托时间 or 成交时间

@@ -22,6 +22,13 @@ void convert_stockinfo(const StockInfo* stockinfo_ptr, StockStaticInfo * stockst
     stockstaticinfo_ptr->lower_limit_price = stockinfo_ptr->lower_limit_price;
 	// 最小变动价位
 	stockstaticinfo_ptr->price_tick = 0.01;
+
+    stockinfo_ptr += 1;
+
+    if (stockinfo_ptr->pre_close_price > 0)
+        *is_last = false;
+    else
+        *is_last = true;
 }
 
 // 转换深度行情数据

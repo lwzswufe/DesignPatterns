@@ -1,7 +1,11 @@
 //定义本地行情类相关数据结构
-#include <stdint.h>
 #define STOCK_EXCHANGE_SH 1
 #define STOCK_EXCHANGE_SZ 2
+#define LOCAL_CODESOZE 8
+#define LOCAL_NAMESIZE 16
+
+typedef int                int32_t;
+typedef long long          int64_t;
 
 ///快照行情
 typedef struct SnapDataStruct
@@ -10,7 +14,7 @@ typedef struct SnapDataStruct
     ///交易所代码
     int exchange_id;
     ///合约代码（不包含交易所信息），不带空格，以'\0'结尾
-    char	code[8];
+    char	code[LOCAL_CODESOZE];
 
     // 价格
 	///最新价
@@ -51,7 +55,7 @@ typedef struct LevelDataStruct
     ///交易所代码
     int exchange_id;
     ///合约代码（不包含交易所信息），不带空格，以'\0'结尾
-    char	code[8];
+    char	code[LOCAL_CODESOZE];
     /// 时间类，格式为YYYYMMDDHHMMSSsss
     int64_t data_time;
 
@@ -86,7 +90,7 @@ struct StockInfo {
     ///交易所代码
     int exchange_id;
     ///合约代码（不包含交易所信息），不带空格，以'\0'结尾
-    char    code[8];
+    char    code[LOCAL_CODESOZE];
     /// 合约名称
     char    name[16];
     ///昨收盘
@@ -105,7 +109,7 @@ struct TickOrder {
     ///交易所代码
     int exchange_id;
     ///合约代码（不包含交易所信息），不带空格，以'\0'结尾
-    char code[8];
+    char code[LOCAL_CODESOZE];
     ///委托时间 
     int64_t data_time;
     ///委托序号(在同一个channel_no内唯一，从1开始连续)
@@ -125,7 +129,7 @@ struct TickTrade {
     ///交易所代码
     int exchange_id;
     ///合约代码（不包含交易所信息），不带空格，以'\0'结尾
-    char code[8];
+    char code[LOCAL_CODESOZE];
     ///成交时间
     int64_t data_time;
     ///委托序号(在同一个channel_no内唯一，从1开始连续)
