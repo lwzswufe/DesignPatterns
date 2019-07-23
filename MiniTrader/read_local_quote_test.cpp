@@ -2,7 +2,7 @@
 #include "read_local_quote.h"
 
 /*
-g++ base_data_struct.h quote_api_struct.h read_local_quote.h read_local_quote.cpp read_local_quote_test.cpp -o read_local_quote_test.exe
+g++ local_quote_struct.h read_local_quote.h read_local_quote.cpp read_local_quote_test.cpp -o read_local_quote_test.exe
 */
 
 // 测试读取股票信息
@@ -13,7 +13,7 @@ void test_stock_info(const char * filename)
     while (ptr->pre_close_price > 0)
     {
         printf("code:%s Market:%d preclose:%.2lf\tuplimit:%.2lf\n", 
-        ptr->ticker, ptr->exchange_id,  ptr->pre_close_price, ptr->upper_limit_price);
+        ptr->code, ptr->exchange_id,  ptr->pre_close_price, ptr->upper_limit_price);
         ptr++;
         stock_num++;
     }
@@ -32,7 +32,7 @@ void test_snap_data(const char* filename)
         {
             snapdata_flag *= 2;
             printf("code:%s Market:%d preclose:%.2lf\tuplimit:%.2lf\n", 
-            ptr->ticker, ptr->exchange_id,  ptr->pre_close_price, ptr->upper_limit_price);
+            ptr->code, ptr->exchange_id,  ptr->pre_close_price, ptr->upper_limit_price);
         }
         ptr++;
     }
@@ -51,11 +51,11 @@ void test_level_data(const char * filename)
         {
             leveldata_flag *= 2;
             printf("line:%08d code:%s Market:%d b1pr:%.2lf b1vol_queue:%d\n", data_num, 
-            ptr->ticker, ptr->exchange_id,  ptr->bid[0], ptr->bid1_count);
+            ptr->code, ptr->exchange_id,  ptr->bid[0], ptr->bid1_count);
             for (int i=0; i<50; i++)
             {   
                 if (ptr->bid1_qty[i] > 0)
-                    printf("%lld|", ptr->bid1_qty[i]);
+                    printf("%ld|", ptr->bid1_qty[i]);
             }
             printf("\n");
         }
@@ -67,15 +67,15 @@ void test_level_data(const char * filename)
 void test_tick_order(const char * filename)
 {
     int data_num = 0, flag = 1, total_num;
-    TickByTickOrder* ptr = read_tick_order_from_file(filename, &total_num);
+    TickOrder* ptr = read_tick_order_from_file(filename, &total_num);
     while (ptr->data_time > 0)
     {   
         data_num++;
         if (data_num >= flag)
         {
             flag *= 2;
-            printf("line:%08d code:%s Market:%d seq:%09lld price:%.2lf vol:%lld side:%c type:%c\n", data_num, 
-            ptr->ticker, ptr->exchange_id, ptr->seq, ptr->price, ptr->qty, ptr->side, ptr->type);
+            printf("line:%08d code:%s Market:%d seq:%09ld price:%.2lf vol:%ld side:%c type:%c\n", data_num, 
+            ptr->code, ptr->exchange_id, ptr->seq, ptr->price, ptr->qty, ptr->side, ptr->type);
         }
         ptr++;
     }
@@ -85,15 +85,15 @@ void test_tick_order(const char * filename)
 void test_tick_trade(const char * filename)
 {
     int data_num = 0, flag = 1, total_num;
-    TickByTickTrade* ptr = read_tick_trade_from_file(filename, &total_num);
+    TickTrade* ptr = read_tick_trade_from_file(filename, &total_num);
     while (ptr->data_time > 0)
     {   
         data_num++;
         if (data_num >= flag)
         {
             flag *= 2;
-            printf("line:%08d code:%s Market:%d seq:%09lld seq_buy:%09lld seq_sell:%09lld price:%.2lf vol:%lld type:%c\n", data_num, 
-            ptr->ticker, ptr->exchange_id, ptr->seq, ptr->bid_no, ptr->ask_no, ptr->price, ptr->qty, ptr->type);
+            printf("line:%08d code:%s Market:%d seq:%09ld seq_buy:%09ld seq_sell:%09ld price:%.2lf vol:%ld type:%c\n", data_num, 
+            ptr->code, ptr->exchange_id, ptr->seq, ptr->bid_no, ptr->ask_no, ptr->price, ptr->qty, ptr->type);
         }
         ptr++;
     }
@@ -102,10 +102,10 @@ void test_tick_trade(const char * filename)
 
 int main()
 {   
-    test_stock_info("F:\\data\\uplimit_list.csv");
-    test_snap_data("D:\\data\\L2_data\\2017\\01\\03\\am_hq_snap_spot.csv");
-    test_level_data("D:\\data\\L2_data\\2017\\01\\03\\am_snap_level_spot.csv");
-    test_tick_order("D:\\data\\L2_data\\2017\\01\\03\\am_hq_order_spot.csv");
-    test_tick_trade("D:\\data\\L2_data\\2017\\01\\03\\am_hq_trade_spot.csv");
+    test_stock_info("/home/wiz/data/uplimit_list.csv");
+    test_snap_data("/home/wiz/data/L2_data/2017/01/03/am_hq_snap_spot.csv");
+    test_level_data("/home/wiz/data/L2_data/2017/01/03/am_snap_level_spot.csv");
+    test_tick_order("/home/wiz/data/L2_data/2017/01/03/am_hq_order_spot.csv");
+    test_tick_trade("/home/wiz/data/L2_data/2017/01/03/am_hq_trade_spot.csv");
     return 0;
 }

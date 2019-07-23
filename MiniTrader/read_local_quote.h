@@ -1,4 +1,4 @@
-#include "loacl_quote_struct.h"
+#include "local_quote_struct.h"
 #define QUOTE_LINESIZE 1024
 #define QUOTE_BLOCKSIZE 1024
 #define QUOTE_BLOCKNUM 32768
@@ -57,10 +57,10 @@ bool read_level_data_from_line(char* line, LevelData* marketdata_ptr);
 // char* line  需要读取的字符串
 // TickByTickEntrust* entrust_ptr 需要赋值的结构体
 // 返回读取结果  true 读取成功   false 读取失败
-bool read_tick_order_from_line(char* line, TickByTickOrder* tickorder_ptr);
+bool read_tick_order_from_line(char* line, TickOrder* tickorder_ptr);
 
 // 读取逐笔成交
 // char* line  需要读取的字符串
 // TickByTickTrade* trade_ptr 需要赋值的结构体
 // 返回读取结果  true 读取成功   false 读取失败
-bool read_tick_trade_from_line(char* line, TickByTickTrade* ticktrade_ptr);
+bool read_tick_trade_from_line(char* line, TickTrade* ticktrade_ptr);

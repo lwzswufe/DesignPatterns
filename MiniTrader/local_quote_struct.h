@@ -3,10 +3,7 @@
 #define STOCK_EXCHANGE_SZ 2
 #define LOCAL_CODESOZE 8
 #define LOCAL_NAMESIZE 16
-
-typedef int                int32_t;
-typedef long long          int64_t;
-
+#include <stdint.h>
 ///快照行情
 typedef struct SnapDataStruct
 {

@@ -8,14 +8,13 @@
 void split_line_to_word_array(char* line, const char* separator, char** word_array, const int word_num)
 {
     char *token = NULL;                     // 找到的字符串
-    char *next_token = NULL;                // 剩下的字符串
     int i = 0;
-    token = strtok_s(line, separator, &next_token);
+    token = strtok(line, separator);
     while (token != NULL && i< word_num)
     {   
         word_array[i] = token;
         i++;
-        token = strtok_s(NULL, separator, &next_token);
+        token = strtok(NULL, separator);
     }
     // 子字符串数量小于word_num word_array 未赋值部分赋值为NULL 
     for(; i< word_num; i++)
@@ -197,19 +196,19 @@ LevelData* read_level_data_from_file(const char* filename, int *array_size)
     *array_size = total_num;
     // 末元素充值为0
     memset(leveldata_ptr+total_num, 0, sizeof(LevelData));
-    printf("get %lld level data\n", total_num);
+    printf("get %ld level data\n", total_num);
     return leveldata_ptr;
 }
 
 
 // 从文件里读取逐笔委托
-TickByTickOrder* read_tick_order_from_file(const char* filename, int *array_size)
+TickOrder* read_tick_order_from_file(const char* filename, int *array_size)
 {
     FILE * pFile;
     char line[QUOTE_LINESIZE];
     size_t total_num = 0, block_num = 0, block_count = 0;
-    TickByTickOrder* tickorder_ptr_arr[QUOTE_BLOCKNUM];
-    memset(tickorder_ptr_arr, 0, sizeof(TickByTickOrder *) * QUOTE_BLOCKNUM);
+    TickOrder* tickorder_ptr_arr[QUOTE_BLOCKNUM];
+    memset(tickorder_ptr_arr, 0, sizeof(TickOrder *) * QUOTE_BLOCKNUM);
     pFile = fopen(filename , "r");
     if ( pFile == NULL ) 
     {
@@ -217,7 +216,7 @@ TickByTickOrder* read_tick_order_from_file(const char* filename, int *array_size
         return NULL;
     }
     // 首次分配空间
-    TickByTickOrder* tickorder_ptr = new TickByTickOrder[QUOTE_BLOCKSIZE];
+    TickOrder* tickorder_ptr = new TickOrder[QUOTE_BLOCKSIZE];
     tickorder_ptr_arr[block_num] = tickorder_ptr;
     block_num++;
     while ( ! feof (pFile) )
@@ -234,7 +233,7 @@ TickByTickOrder* read_tick_order_from_file(const char* filename, int *array_size
             // 当前块block空间使用完毕 分配新block
             if ( block_count == QUOTE_BLOCKSIZE )
             {
-                tickorder_ptr = new TickByTickOrder[QUOTE_BLOCKSIZE];
+                tickorder_ptr = new TickOrder[QUOTE_BLOCKSIZE];
                 tickorder_ptr_arr[block_num] = tickorder_ptr;
                 block_num++;
                 block_count = 0;
@@ -243,7 +242,7 @@ TickByTickOrder* read_tick_order_from_file(const char* filename, int *array_size
     }
     fclose (pFile);
     // 为所有数据分配新空间
-    tickorder_ptr = new TickByTickOrder[total_num+1];
+    tickorder_ptr = new TickOrder[total_num+1];
     size_t block_size;
     // 依次将每一个块的数据拷贝到新空间中去
     for (int block_id=0; block_id<block_num; block_id++)
@@ -252,24 +251,24 @@ TickByTickOrder* read_tick_order_from_file(const char* filename, int *array_size
             block_size = QUOTE_BLOCKSIZE;
         else 
             block_size = block_count;
-        memcpy(tickorder_ptr + QUOTE_BLOCKSIZE * block_id, tickorder_ptr_arr[block_id], sizeof(TickByTickOrder) * block_size);
+        memcpy(tickorder_ptr + QUOTE_BLOCKSIZE * block_id, tickorder_ptr_arr[block_id], sizeof(TickOrder) * block_size);
         delete[] tickorder_ptr_arr[block_id];
     }
     *array_size = total_num;
     // 末元素充值为0
-    memset(tickorder_ptr+total_num, 0, sizeof(TickByTickOrder));
-    printf("get %lld level data\n", total_num);
+    memset(tickorder_ptr+total_num, 0, sizeof(TickOrder));
+    printf("get %ld level data\n", total_num);
     return tickorder_ptr;
 }
 
 // 从文件里读取逐笔成交
-TickByTickTrade* read_tick_trade_from_file(const char* filename, int *array_size)
+TickTrade* read_tick_trade_from_file(const char* filename, int *array_size)
 {
     FILE * pFile;
     char line[QUOTE_LINESIZE];
     size_t total_num = 0, block_num = 0, block_count = 0;
-    TickByTickTrade* ticktrade_ptr_arr[QUOTE_BLOCKNUM];
-    memset(ticktrade_ptr_arr, 0, sizeof(TickByTickTrade *) * QUOTE_BLOCKNUM);
+    TickTrade* ticktrade_ptr_arr[QUOTE_BLOCKNUM];
+    memset(ticktrade_ptr_arr, 0, sizeof(TickTrade *) * QUOTE_BLOCKNUM);
     pFile = fopen(filename , "r");
     if ( pFile == NULL ) 
     {
@@ -277,7 +276,7 @@ TickByTickTrade* read_tick_trade_from_file(const char* filename, int *array_size
         return NULL;
     }
     // 首次分配空间
-    TickByTickTrade* ticktrade_ptr = new TickByTickTrade[QUOTE_BLOCKSIZE];
+    TickTrade* ticktrade_ptr = new TickTrade[QUOTE_BLOCKSIZE];
     ticktrade_ptr_arr[block_num] = ticktrade_ptr;
     block_num++;
     while ( ! feof (pFile) )
@@ -294,7 +293,7 @@ TickByTickTrade* read_tick_trade_from_file(const char* filename, int *array_size
             // 当前块block空间使用完毕 分配新block
             if ( block_count == QUOTE_BLOCKSIZE )
             {
-                ticktrade_ptr = new TickByTickTrade[QUOTE_BLOCKSIZE];
+                ticktrade_ptr = new TickTrade[QUOTE_BLOCKSIZE];
                 ticktrade_ptr_arr[block_num] = ticktrade_ptr;
                 block_num++;
                 block_count = 0;
@@ -303,7 +302,7 @@ TickByTickTrade* read_tick_trade_from_file(const char* filename, int *array_size
     }
     fclose (pFile);
     // 为所有数据分配新空间
-    ticktrade_ptr = new TickByTickTrade[total_num+1];
+    ticktrade_ptr = new TickTrade[total_num+1];
     size_t block_size;
     // 依次将每一个块的数据拷贝到新空间中去
     for (int block_id=0; block_id<block_num; block_id++)
@@ -312,13 +311,13 @@ TickByTickTrade* read_tick_trade_from_file(const char* filename, int *array_size
             block_size = QUOTE_BLOCKSIZE;
         else 
             block_size = block_count;
-        memcpy(ticktrade_ptr + QUOTE_BLOCKSIZE * block_id, ticktrade_ptr_arr[block_id], sizeof(TickByTickTrade) * block_size);
+        memcpy(ticktrade_ptr + QUOTE_BLOCKSIZE * block_id, ticktrade_ptr_arr[block_id], sizeof(TickTrade) * block_size);
         delete[] ticktrade_ptr_arr[block_id];
     }
     *array_size = total_num;
     // 末元素充值为0
-    memset(ticktrade_ptr+total_num, 0, sizeof(TickByTickTrade));
-    printf("get %lld level data\n", total_num);
+    memset(ticktrade_ptr+total_num, 0, sizeof(TickTrade));
+    printf("get %ld level data\n", total_num);
     return ticktrade_ptr;
 }
 
@@ -331,20 +330,28 @@ bool read_stock_info_from_line(char* line, StockInfo* stockinfo_ptr, const int d
     market = line[8];
     switch(market)
     {
-        case 'H': stockinfo_ptr->exchange_id = EXCHANGE_SH; break;
-        case 'Z': stockinfo_ptr->exchange_id = EXCHANGE_SZ; break;
+        case 'H': stockinfo_ptr->exchange_id = STOCK_EXCHANGE_SH; break;
+        case 'Z': stockinfo_ptr->exchange_id = STOCK_EXCHANGE_SZ; break;
         default : return false;
     }
-    strncpy(stockinfo_ptr->ticker, line, 6);
-    stockinfo_ptr->ticker[6] = 0;
+    strncpy(stockinfo_ptr->code, line, 6);
+    stockinfo_ptr->code[6] = 0;
     // 获取日期与价格数据
     int date_;
     double preclose, uplimit;
     // 跳过前10个字符xxxxxx.SZ,
     line += 10;
-    int match_num = sscanf(line, "%d,%*lf,%*lf,%*lf,%*lf,%lf,%*lf,%*lf,%*lf,%*lf,%lf", 
-                          &date_, &(stockinfo_ptr->pre_close_price), &(stockinfo_ptr->upper_limit_price));
-    if (match_num < 3 || date_ != date)
+    // 获取证券代码与价格信息
+    const int word_num = 11;
+    char * word_array[word_num];
+    const char *tab = ",";
+    split_line_to_word_array(line, tab, word_array, word_num);
+
+    date_ = atoi(word_array[0]);
+    stockinfo_ptr->pre_close_price = atof(word_array[5]);
+    stockinfo_ptr->upper_limit_price = atof(word_array[10]);
+
+    if (date_ != date)
         return false;
     // 计算跌停价
     stockinfo_ptr->lower_limit_price = round(stockinfo_ptr->pre_close_price * 90 + 0.01) / 100.0;
@@ -359,15 +366,26 @@ bool read_snap_data_from_line(char* line, SnapData* ptr)
     // 获取时间
     int match_num, codenum;
     line += 9;
-    sscanf(line, "%lld", &(ptr->data_time));
+    sscanf(line, "%ld", &(ptr->data_time));
   
-    // 获取证券代码与价格信息
+    // 
     line += 72;
-    match_num = sscanf(line, "%*d\t%d\t%*d \t%*d\t%lf\t%*lf\t%*lf\t%lf\t%lf\t%lf\t%lf\t%lld\t%lld\t%lf\t%*lf\t%*lf\t%*2C\t%*lf\t%*lf\t%*lf\t%*lf\t%*lf\t%*lf\t%*lf\t%lf\t%lf",
-                        &codenum, &(ptr->pre_close_price), &(ptr->open_price), &(ptr->high_price), &(ptr->low_price), &(ptr->last_price),
-                        &(ptr->trades_count), &(ptr->qty), &(ptr->turnover), &(ptr->upper_limit_price), &(ptr->lower_limit_price));
-    if (match_num < 11)
-        return false;
+    // 获取证券代码与价格信息
+    const int word_num = 26;
+    char * word_array[word_num];
+    const char *tab = "\t";
+    split_line_to_word_array(line, tab, word_array, word_num);
+
+    codenum = atoi(word_array[1]);
+    ptr->pre_close_price = atof(word_array[4]);
+    ptr->open_price = atof(word_array[7]);
+    ptr->high_price = atof(word_array[8]);
+    ptr->low_price = atof(word_array[9]);
+    ptr->last_price = atof(word_array[10]);
+    ptr->qty = atoi(word_array[12]);
+    ptr->turnover = atof(word_array[13]);
+    ptr->upper_limit_price = atof(word_array[24]);
+    ptr->lower_limit_price = atof(word_array[25]);
     // 获取市场与证券代码
 
     char code[32];
@@ -375,12 +393,12 @@ bool read_snap_data_from_line(char* line, SnapData* ptr)
     switch(code[0])
     {
         case '0': 
-        case '3': ptr->exchange_id = EXCHANGE_SZ; break;
-        case '6': ptr->exchange_id = EXCHANGE_SH; break;
+        case '3': ptr->exchange_id = STOCK_EXCHANGE_SZ; break;
+        case '6': ptr->exchange_id = STOCK_EXCHANGE_SH; break;
         default : return false;
     }
-    strncpy(ptr->ticker, code, 6);
-    ptr->ticker[6] = 0;
+    strncpy(ptr->code, code, 6);
+    ptr->code[6] = 0;
     return true;
 }
 
@@ -391,7 +409,7 @@ bool read_level_data_from_line(char* line, LevelData* ptr)
     // 获取时间
     // 跳过日期字段
     line += 9;
-    sscanf(line, "%lld", &(ptr->data_time));
+    sscanf(line, "%ld", &(ptr->data_time));
     // 跳过时间字段
     line += 72;
     // 获取价格信息
@@ -408,12 +426,12 @@ bool read_level_data_from_line(char* line, LevelData* ptr)
     switch(code[0])
     {
         case '0': 
-        case '3': ptr->exchange_id = EXCHANGE_SZ; break;
-        case '6': ptr->exchange_id = EXCHANGE_SH; break;
+        case '3': ptr->exchange_id = STOCK_EXCHANGE_SZ; break;
+        case '6': ptr->exchange_id = STOCK_EXCHANGE_SH; break;
         default : return false;
     }
-    strncpy(ptr->ticker, code, 6);
-    ptr->ticker[6] = 0;
+    strncpy(ptr->code, code, 6);
+    ptr->code[6] = 0;
     // 从word_array的第idx元素 获取 第i档报价 
     int idx = 4;
     for (int i=0; i<10; i++)
@@ -439,7 +457,7 @@ bool read_level_data_from_line(char* line, LevelData* ptr)
     return true;
 }
 
-bool read_tick_order_from_line(char* line, TickByTickOrder* ptr)
+bool read_tick_order_from_line(char* line, TickOrder* ptr)
 {
     if (line == NULL || ptr == NULL || strlen(line) < 100)
         return false;
@@ -447,10 +465,10 @@ bool read_tick_order_from_line(char* line, TickByTickOrder* ptr)
     // 获取时间
     // 跳过日期字段
     line += 9;
-    sscanf(line, "%lld", &(ptr->data_time));
+    sscanf(line, "%ld", &(ptr->data_time));
     // 跳过时间字段
     line += 72;
-    match_num = sscanf(line, "%*d\t%*d\t%lld\t%d\t%*d\t%lf\t%lld\t%c\t%c",
+    match_num = sscanf(line, "%*d\t%*d\t%ld\t%d\t%*d\t%lf\t%ld\t%c\t%c",
                         &(ptr->seq), &codenum, &(ptr->price), &(ptr->qty), &(ptr->side), &(ptr->type));
     if (match_num < 6)
         return false;
@@ -460,16 +478,16 @@ bool read_tick_order_from_line(char* line, TickByTickOrder* ptr)
     switch(code[0])
     {
         case '0': 
-        case '3': ptr->exchange_id = EXCHANGE_SZ; break;
-        case '6': ptr->exchange_id = EXCHANGE_SH; break;
+        case '3': ptr->exchange_id = STOCK_EXCHANGE_SZ; break;
+        case '6': ptr->exchange_id = STOCK_EXCHANGE_SH; break;
         default : return false;
     }
-    strncpy(ptr->ticker, code, 6);
-    ptr->ticker[6] = 0;
+    strncpy(ptr->code, code, 6);
+    ptr->code[6] = 0;
     return true;
 }
 
-bool read_tick_trade_from_line(char* line, TickByTickTrade* ptr)
+bool read_tick_trade_from_line(char* line, TickTrade* ptr)
 {
     if (line == NULL || ptr == NULL || strlen(line) < 100)
         return false;
@@ -477,10 +495,10 @@ bool read_tick_trade_from_line(char* line, TickByTickTrade* ptr)
     // 获取时间
     // 跳过日期字段
     line += 9;
-    sscanf(line, "%lld", &(ptr->data_time));
+    sscanf(line, "%ld", &(ptr->data_time));
     // 跳过时间字段
     line += 72;
-    match_num = sscanf(line, "%*d\t%*d\t%lld\t%d\t%*d\t%lld\t%lld\t%lf\t%lld\t%c",
+    match_num = sscanf(line, "%*d\t%*d\t%ld\t%d\t%*d\t%ld\t%ld\t%lf\t%ld\t%c",
                         &(ptr->seq), &codenum, &(ptr->bid_no), &(ptr->ask_no), &(ptr->price), &(ptr->qty), &(ptr->type));
     if (match_num < 6)
         return false;
@@ -490,11 +508,11 @@ bool read_tick_trade_from_line(char* line, TickByTickTrade* ptr)
     switch(code[0])
     {
         case '0': 
-        case '3': ptr->exchange_id = EXCHANGE_SZ; break;
-        case '6': ptr->exchange_id = EXCHANGE_SH; break;
+        case '3': ptr->exchange_id = STOCK_EXCHANGE_SZ; break;
+        case '6': ptr->exchange_id = STOCK_EXCHANGE_SH; break;
         default : return false;
     }
-    strncpy(ptr->ticker, code, 6);
-    ptr->ticker[6] = 0;
+    strncpy(ptr->code, code, 6);
+    ptr->code[6] = 0;
     return true;
 }
