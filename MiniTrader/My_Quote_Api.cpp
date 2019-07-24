@@ -1,0 +1,112 @@
+#include <unistd.h>
+#include <pthread.h>
+#include <memory>
+#include "My_Quote_Api.h"
+#include "local_quote_convert.h"
+
+QuoteApi * QuoteApi::CreateQuoteApi(uint8_t client_id, const char *save_file_path, LOG_LEVEL log_level)
+{
+    return new MyQuoteApi;
+}
+
+void MyQuoteApi::RegisterSpi(QuoteSpi *spi)
+{
+    this->_spi = spi;
+}
+
+int MyQuoteApi::Login(const char* ip, int port, const char* user, const char* password, PROTOCOL_TYPE sock_type)
+{
+    this->start_push_quote_thread();
+}
+
+int MyQuoteApi::Logout()
+{
+    this->close_push_quote_thread();
+}
+
+QuoteApi* QuoteApi::CreateQuoteApi(const char* inifile)
+{
+    QuoteApi *api = new MyQuoteApi(inifile)
+}
+
+MyQuoteApi::MyQuoteApi(const char* inifile)
+{
+
+}
+
+// 行情推送线程
+void *task_push_quote(void* arg)
+{   
+    Quote_Push_Param_Struct *param = (Quote_Push_Param_Struct*)arg;
+    int * clock_ptr = &(param->clock);
+    QuoteSpi* spi = param->spi;
+    Quote_Generator* generator = param->generator;
+    Quote_Generator gr("a.txt");
+    // xtp数据指针
+    bool is_last, is_am = true;
+    ErrorInfo errorinfo;
+    StockStaticInfo stockinfo, *stockinfo_ptr = &stockinfo;
+    TickByTickStruct tickbytick, *tick_ptr = &tickbytick;
+    DepthData depthdata, *depthdata_ptr = &depthdata;
+    // 本地数据指针
+    const StockInfo* info_ptr;
+    const TickOrder* tickorder_ptr;
+    const TickTrade* ticktrade_ptr;
+    const SnapData* snap_ptr;
+    const LevelData* level_ptr;
+    // 线程id
+    pthread_t pid = pthread_self();
+    printf("%s start\n", __func__);
+    // 推送股票信息
+    info_ptr = generator->Get_StockInfo();
+    while (info_ptr != NULL)
+    {   
+        convert_stockinfo(info_ptr, stockinfo_ptr, &is_last);
+        spi->OnQueryAllTickers(stockinfo_ptr, &errorinfo, is_last);
+        info_ptr = generator->Get_StockInfo();
+    }
+    generator->load_data(is_am);
+    // 开始推送行情
+    while(generator->Get_Clock() < 150000.00)
+    {   // 判断是否需要载入下午的数据
+        if (generator->check_is_need_load_data())
+        {   
+            if (is_am)
+            {
+                is_am = false;
+                generator->load_data(is_am);
+            }
+        }
+        // 推送行情数据
+        tickorder_ptr = generator->Get_TickOrder();
+        while(tickorder_ptr != NULL)
+        {   
+            convert_tickorder(tickorder_ptr, tick_ptr);
+            spi->OnTickByTick(tick_ptr);
+            tickorder_ptr = generator->Get_TickOrder();
+        }
+
+        ticktrade_ptr = generator->Get_TickTrade();
+        while(ticktrade_ptr != NULL)
+        {   
+            convert_ticktrade(ticktrade_ptr, tick_ptr);
+            spi->OnTickByTick(tick_ptr);
+            ticktrade_ptr = generator->Get_TickTrade();
+        }
+
+        snap_ptr = generator->Get_SnapData();
+        level_ptr = generator->Get_LevelData();
+        while(snap_ptr != NULL && level_ptr != NULL)
+        {
+            convert_depthdata(snap_ptr, level_ptr, depthdata_ptr);
+            spi->OnDepthMarketData(depthdata_ptr);
+            snap_ptr = generator->Get_SnapData();
+            level_ptr = generator->Get_LevelData();
+        }
+        // 设置时间
+        *clock_ptr = generator->Get_Clock();
+        SetCurrentTime(generator->Get_Time());
+    }
+    printf("%s end\n", __func__);
+    pthread_exit(0);
+}
