@@ -1,5 +1,6 @@
 #VScode Cache
 /.vscode/ipch/
+/MiniTrader/build/
 # Prerequisites
 *.d
 
