@@ -1,4 +1,7 @@
+#ifndef _LOCAL_QUOTE_STRUCT_
+#define _LOCAL_QUOTE_STRUCT_
 #include "local_quote_struct.h"
+#endif
 #define QUOTE_LINESIZE 1024
 #define QUOTE_BLOCKSIZE 1024
 #define QUOTE_BLOCKNUM 32768

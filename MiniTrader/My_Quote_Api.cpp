@@ -4,9 +4,9 @@
 #include "My_Quote_Api.h"
 #include "local_quote_convert.h"
 
-QuoteApi * QuoteApi::CreateQuoteApi(uint8_t client_id, const char *save_file_path, LOG_LEVEL log_level)
-{
-    return new MyQuoteApi;
+QuoteApi * QuoteApi::CreateQuoteApi(const char *inifile)
+{   
+    return new MyQuoteApi(inifile);
 }
 
 void MyQuoteApi::RegisterSpi(QuoteSpi *spi)
@@ -14,24 +14,65 @@ void MyQuoteApi::RegisterSpi(QuoteSpi *spi)
     this->_spi = spi;
 }
 
-int MyQuoteApi::Login(const char* ip, int port, const char* user, const char* password, PROTOCOL_TYPE sock_type)
+int MyQuoteApi::Login()
 {
     this->start_push_quote_thread();
+    return 0;
 }
 
 int MyQuoteApi::Logout()
 {
     this->close_push_quote_thread();
+    return 0;
 }
 
-QuoteApi* QuoteApi::CreateQuoteApi(const char* inifile)
+MyQuoteApi::MyQuoteApi(const char* ini_file)
 {
-    QuoteApi *api = new MyQuoteApi(inifile)
+    this->quote_param.push_status = true;
+    this->quote_param.clock = 0;
+    this->ini_file = ini_file;
+    this->quote_param.spi = NULL;
 }
 
-MyQuoteApi::MyQuoteApi(const char* inifile)
-{
+void MyQuoteApi::start_push_quote_thread()
+{   
+    pthread_t pid_quote;      
+    int pthread_ret;
+    this->quote_param.spi = this->_spi;
+    pthread_ret = pthread_create(&pid_quote, NULL, task_push_quote, &(this->quote_param));         
+    if(pthread_ret!=0)
+    {
+        printf("Create pthread_quote error!\n");
+    }
+    else 
+    {
+        printf("Create pthread_quote successful!\n");
+    }
+}
 
+void MyQuoteApi::close_push_quote_thread()
+{
+    this->quote_param.push_status = false;
+    printf("stop pthread_quote\n");
+}
+
+int MyQuoteApi::QueryAllTickers(EXCHANGE_TYPE exchange_id)
+{   
+    this->start_push_quote_thread();
+    return 0;
+}
+
+
+int MyQuoteApi::GetClock()
+{   
+    return ApiTimenum;
+}
+
+int ApiTimenum;
+
+int GetTimenum()
+{
+    return ApiTimenum;
 }
 
 // 行情推送线程
@@ -40,8 +81,7 @@ void *task_push_quote(void* arg)
     Quote_Push_Param_Struct *param = (Quote_Push_Param_Struct*)arg;
     int * clock_ptr = &(param->clock);
     QuoteSpi* spi = param->spi;
-    Quote_Generator* generator = param->generator;
-    Quote_Generator gr("a.txt");
+    Quote_Generator generator(param->ini_file);
     // xtp数据指针
     bool is_last, is_am = true;
     ErrorInfo errorinfo;
@@ -58,54 +98,55 @@ void *task_push_quote(void* arg)
     pthread_t pid = pthread_self();
     printf("%s start\n", __func__);
     // 推送股票信息
-    info_ptr = generator->Get_StockInfo();
+    info_ptr = generator.Get_StockInfo();
     while (info_ptr != NULL)
     {   
         convert_stockinfo(info_ptr, stockinfo_ptr, &is_last);
         spi->OnQueryAllTickers(stockinfo_ptr, &errorinfo, is_last);
-        info_ptr = generator->Get_StockInfo();
+        info_ptr = generator.Get_StockInfo();
     }
-    generator->load_data(is_am);
+    generator.load_data(is_am);
     // 开始推送行情
-    while(generator->Get_Clock() < 150000.00)
+    while(generator.Get_Clock() < 150000.00)
     {   // 判断是否需要载入下午的数据
-        if (generator->check_is_need_load_data())
+        if (generator.check_is_need_load_data())
         {   
             if (is_am)
             {
                 is_am = false;
-                generator->load_data(is_am);
+                generator.load_data(is_am);
             }
         }
         // 推送行情数据
-        tickorder_ptr = generator->Get_TickOrder();
+        tickorder_ptr = generator.Get_TickOrder();
         while(tickorder_ptr != NULL)
         {   
             convert_tickorder(tickorder_ptr, tick_ptr);
             spi->OnTickByTick(tick_ptr);
-            tickorder_ptr = generator->Get_TickOrder();
+            tickorder_ptr = generator.Get_TickOrder();
         }
 
-        ticktrade_ptr = generator->Get_TickTrade();
+        ticktrade_ptr = generator.Get_TickTrade();
         while(ticktrade_ptr != NULL)
         {   
             convert_ticktrade(ticktrade_ptr, tick_ptr);
             spi->OnTickByTick(tick_ptr);
-            ticktrade_ptr = generator->Get_TickTrade();
+            ticktrade_ptr = generator.Get_TickTrade();
         }
 
-        snap_ptr = generator->Get_SnapData();
-        level_ptr = generator->Get_LevelData();
+        snap_ptr = generator.Get_SnapData();
+        level_ptr = generator.Get_LevelData();
         while(snap_ptr != NULL && level_ptr != NULL)
         {
             convert_depthdata(snap_ptr, level_ptr, depthdata_ptr);
             spi->OnDepthMarketData(depthdata_ptr);
-            snap_ptr = generator->Get_SnapData();
-            level_ptr = generator->Get_LevelData();
+            snap_ptr = generator.Get_SnapData();
+            level_ptr = generator.Get_LevelData();
         }
         // 设置时间
-        *clock_ptr = generator->Get_Clock();
-        SetCurrentTime(generator->Get_Time());
+        *clock_ptr = generator.Get_Clock();
+        ApiTimenum = *clock_ptr;
+        // SetCurrentTime(generator.Get_Time());
     }
     printf("%s end\n", __func__);
     pthread_exit(0);

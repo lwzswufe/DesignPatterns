@@ -32,7 +32,7 @@ void convert_stockinfo(const StockInfo* stockinfo_ptr, StockStaticInfo * stockst
 }
 
 // 转换深度行情数据
-void convert_depthdata(const SnapData* snap_ptr, LevelData* level_ptr, DepthData * data_ptr)
+void convert_depthdata(const SnapData* snap_ptr, const LevelData* level_ptr, DepthData * data_ptr)
 {
     // 交易所
     switch(snap_ptr->exchange_id)

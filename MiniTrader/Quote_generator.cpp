@@ -1,10 +1,25 @@
+#include <stdio.h>
+#include <string.h>
 #include "Quote_generator.h"
 #include "read_local_quote.h"
+#ifndef _READ_INI_H_
+#define _READ_INI_H_
+#include "Read_ini.h"
+#endif
 
-Quote_Generator::Quote_Generator(const char* ini_file);
+Quote_Generator::Quote_Generator(const char* ini_file)
 {   
+    IniType conf = Read_ini(ini_file);
+    const char *dir_ = conf["main"]["basktest_dir_linux"].c_str();
+    this->dirname = new char[256];
+    strncpy(this->dirname, dir_, strlen(dir_));
+    this->datenum = GetIntFromKey(conf["main"], "backtest_date");
+    if (this->datenum > 20300101 || this->datenum < 20000101)
+    {
+        printf("error date:%d", this->datenum);
+    }
     // 初始化时间为上午九点
-    this->time_now = date * 1000000 * 1000 + 90000 * 1000
+    this->time_now = this->datenum * 1000000 * 1000 + 90000 * 1000;
     // 数组指针初始化
     this->stockinfo_array = NULL;
     this->snapdata_array = NULL;
@@ -21,19 +36,39 @@ Quote_Generator::Quote_Generator(const char* ini_file);
 
 void Quote_Generator::load_data(bool is_am)
 {   
-    const char* filename;
+    /*
+    股票信息列表： "/home/wiz/data/uplimit_list.csv"
+    快照行情:     "/home/wiz/data/L2_data/2017/01/03/am_hq_snap_spot.csv"
+    十档行情:     "/home/wiz/data/L2_data/2017/01/03/am_snap_level_spot.csv"
+    订单流:       "/home/wiz/data/L2_data/2017/01/03/am_hq_order_spot.csv"
+    成交流:       "/home/wiz/data/L2_data/2017/01/03/am_hq_trade_spot.csv"
+    */
+    char am[3] = "am", pm[3] = "pm", *timetype, dir_stockinfo, dir_data;
+    char filename[256];
     int total_num;
     if (is_am)
     {   //上午需载入股票信息数据
-        this->stockinfo_array = read_stock_info_from_file(ini_file this->date, &total_num);
-        this->stockinfo_ptr = this->fist_stockinfo_ptr;
+        timetype = am;
+        sprintf(filename,"%s/uplimit_list.csv", this->dirname);
+        this->stockinfo_array = read_stock_info_from_file(filename, this->datenum, &total_num);
+        this->stockinfo_ptr = this->stockinfo_array;
     }
-    else // 释放上午的数据
-        this->release_data(); 
+    else 
+    {
+        timetype = pm;
+    }
+    int year = this->datenum / 10000;
+    int month = this->datenum % 10000 / 100;
+    int date = this->datenum % 100;
+
     // 载入数据
+    sprintf(filename,"%s/L2_data/%04d/%02d/%02d/%s_hq_snap_spot.csv", this->dirname, year, month, date, timetype);
     this->snapdata_array = read_snap_data_from_file(filename, &total_num);
+    sprintf(filename,"%s/L2_data/%04d/%02d/%02d/%s_snap_level_spot.csv", this->dirname, year, month, date, timetype);
     this->leveldata_array = read_level_data_from_file(filename, &total_num);
+    sprintf(filename,"%s/L2_data/%04d/%02d/%02d/%s_hq_order_spot.csv", this->dirname, year, month, date, timetype);
     this->tickorder_array = read_tick_order_from_file(filename, &total_num);
+    sprintf(filename,"%s/L2_data/%04d/%02d/%02d/%s_hq_trade_spot.csv", this->dirname, year, month, date, timetype);
     this->ticktrade_array = read_tick_trade_from_file(filename, &total_num);
     // 记录需推送的下一条数据的位置
     this->snapdata_ptr = this->snapdata_array;
@@ -42,7 +77,7 @@ void Quote_Generator::load_data(bool is_am)
     this->ticktrade_ptr = this->ticktrade_array;
 }
 
-void Quote_Generator::check_is_need_load_data()
+bool Quote_Generator::check_is_need_load_data()
 {
     if (this->tickorder_array == NULL &&
         this->ticktrade_array == NULL &&
@@ -64,7 +99,7 @@ double Quote_Generator::Get_Clock()
     return now;
 }
 
-StockInfo* Quote_Generator::Get_StockInfo()
+const StockInfo* Quote_Generator::Get_StockInfo()
 {
     if (this->stockinfo_ptr != NULL && this->stockinfo_ptr->pre_close_price > 0)
     {
@@ -81,13 +116,12 @@ StockInfo* Quote_Generator::Get_StockInfo()
     }
 }
 
-TickOrder* Quote_Generator::Get_TickOrder()
+const TickOrder* Quote_Generator::Get_TickOrder()
 {   
     if (this->tickorder_ptr->data_time > 0)
     {   // 若当前数据时间小于等于系统时间 就返回当前指针 再++当前指针 
         if (this->tickorder_ptr != NULL && 
-            this->tickorder_ptr->data_time <= this->time_now;
-            )
+            this->tickorder_ptr->data_time <= this->time_now)
         {
             return this->tickorder_ptr++;
         }
@@ -110,13 +144,12 @@ TickOrder* Quote_Generator::Get_TickOrder()
     }
 }
 
-TickTrade* Get_TickTrade()
+const TickTrade* Quote_Generator::Get_TickTrade()
 {
     if (this->ticktrade_ptr->data_time > 0)
     {   // 若当前数据时间小于等于系统时间 就返回当前指针 再++当前指针 
         if (this->ticktrade_ptr != NULL && 
-            this->ticktrade_ptr->data_time <= this->time_now;
-            )
+            this->ticktrade_ptr->data_time <= this->time_now)
         {
             return this->ticktrade_ptr++;
         }
@@ -138,13 +171,12 @@ TickTrade* Get_TickTrade()
     }
 }
 
-SnapData* Quote_Generator::Get_SnapData();
+const SnapData* Quote_Generator::Get_SnapData()
 {
     if (this->snapdata_ptr->data_time > 0)
     {   // 若当前数据时间小于等于系统时间 就返回当前指针 再++当前指针 
         if (this->snapdata_ptr != NULL && 
-            this->snapdata_ptr->data_time <= this->time_now;
-            )
+            this->snapdata_ptr->data_time <= this->time_now)
         {
             return this->snapdata_ptr++;
         }
@@ -166,13 +198,12 @@ SnapData* Quote_Generator::Get_SnapData();
     }
 }
 
-LevelData* Quote_Generator::Get_LevelData();
+const LevelData* Quote_Generator::Get_LevelData()
 {
     if (this->leveldata_ptr->data_time > 0)
     {   // 若当前数据时间小于等于系统时间 就返回当前指针 再++当前指针 
         if (this->leveldata_ptr != NULL && 
-            this->leveldata_ptr->data_time <= this->time_now;
-            )
+            this->leveldata_ptr->data_time <= this->time_now)
         {
             return this->leveldata_ptr++;
         }

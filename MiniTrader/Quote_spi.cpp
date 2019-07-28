@@ -89,7 +89,7 @@ void MyQuoteSpi::OnQueryAllTickers(StockStaticInfo * ticker_info, ErrorInfo * er
     // }
 }
 
-void MyQuoteSpi::OnDepthMarketData(MarketData * market_data, int64_t bid1_qty[], int32_t bid1_count, 
+void MyQuoteSpi::OnDepthMarketData(DepthMarketData * market_data, int64_t bid1_qty[], int32_t bid1_count, 
                                                              int32_t max_bid1_count, int64_t ask1_qty[], 
                                                              int32_t ask1_count, int32_t max_ask1_count)
 {   // 深度行情通知 包含买一卖一队列

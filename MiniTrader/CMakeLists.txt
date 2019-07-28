@@ -8,16 +8,25 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 set(platform x64)
 
 # 为多个源文件定义别名
-set(SOURCE_FILES local_quote_convert.cpp My_Quote_Api_Test.cpp My_Quote_Api.cpp
-    Quote_api.cpp Quote_generator.cpp Quote_spi.cpp read_local_quote.cpp)
+set(SOURCE_FILES Read_ini.cpp local_quote_convert.cpp My_Quote_Api_Test.cpp 
+    My_Quote_Api.cpp Quote_api.cpp Quote_generator.cpp Quote_spi.cpp 
+    read_local_quote.cpp)
 
-# 为头个源文件定义别名
-set(HEAD_FILES base_data_struct.h local_quote_struct.h local_quote_convert.h
+# 为多个头文件定义别名
+set(HEAD_FILES Read_ini.h base_data_struct.h local_quote_struct.h local_quote_convert.h
     My_Quote_Api.h quote_api_struct.h Quote_api.h Quote_generator.h Quote_spi.h 
     read_local_quote.h)
+# 为多个库文件定义别名
+set(LIB_FILES pthread)
 
-# 定义了这个工程会生成一个文件名为main 的可执行文件，相关的源文件是SRC_LIST中定义的源文件列表
+# 添加库路径
+# link_directories(/usr/lib/x86_64-linux-gnu/)
+
+# 定义了这个工程会生成一个文件名为MiniTrader 的可执行文件，相关的源文件是SRC_LIST中定义的源文件列表
 ADD_EXECUTABLE(MiniTrader ${HEAD_FILES} ${SOURCE_FILES})
+
+# 链接库文件
+TARGET_LINK_LIBRARIES(MiniTrader ${LIB_FILES})
 
 SET_TARGET_PROPERTIES(MiniTrader PROPERTIES OUTPUT_NAME "MiniTrader")
 GET_TARGET_PROPERTY (OUTPUT_VALUE MiniTrader OUTPUT_NAME)

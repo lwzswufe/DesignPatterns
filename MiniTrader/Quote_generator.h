@@ -1,5 +1,7 @@
+#ifndef _LOCAL_QUOTE_STRUCT_
+#define _LOCAL_QUOTE_STRUCT_
 #include "local_quote_struct.h"
-
+#endif
 class Quote_Generator
 {
 public: 
@@ -13,40 +15,42 @@ public:
     // 获取当前时刻 HHMMSS.sss
     double Get_Clock();
     // 获取股票静态信息
-    StockInfo* Get_StockInfo();
+    const StockInfo* Get_StockInfo();
     // 获取逐笔委托 
-    TickOrder* Get_TickOrder();
+    const TickOrder* Get_TickOrder();
     // 逐笔成交信息
-    TickTrade* Get_TickTrade();
+    const TickTrade* Get_TickTrade();
     // 获取深度行情数据
-    SnapData* Get_SnapData();
+    const SnapData* Get_SnapData();
     // 获取深度行情数据
-    LevelData* Get_LevelData();
+    const LevelData* Get_LevelData();
 private:
+    // 配置文件名
+    char * dirname;
     // 当前日期
-    int date;
+    int datenum;
     // 当前时间
     int64_t time_now;
     // 下一个数据的时间
     int64_t time_next;
     // 股票静态数据数组
-    const StockInfo* stockinfo_array;
+    StockInfo* stockinfo_array;
     // 股票静态数据当前指针
-    const StockInfo* stockinfo_ptr;
+    StockInfo* stockinfo_ptr;
     // 股票快照数据数组
-    const SnapData* snapdata_array;
+    SnapData* snapdata_array;
     // 股票快照数据当前指针
-    const SnapData* snapdata_ptr;
+    SnapData* snapdata_ptr;
     // 股票10档行情数据数组
-    const LevelData* leveldata_array;
+    LevelData* leveldata_array;
     // 股票10档行情数据当前指针
-    const LevelData* leveldata_ptr;
+    LevelData* leveldata_ptr;
     // 逐笔委托数据数组
-    const TickOrder* tickorder_array;
+    TickOrder* tickorder_array;
     // 逐笔委托数据当前指针
-    const TickOrder* tickorder_ptr;
+    TickOrder* tickorder_ptr;
     // 逐笔成交数据数组
-    const TickTrade* ticktrade_array;
+    TickTrade* ticktrade_array;
     // 逐笔成交数据当前指针
-    const TickTrade* ticktrade_ptr;
+    TickTrade* ticktrade_ptr;
 };

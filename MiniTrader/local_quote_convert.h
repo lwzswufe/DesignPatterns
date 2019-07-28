@@ -1,7 +1,10 @@
 // 接受本地数据转并返回 回测系统需要的数据结构
 
 // 本地数据结构
+#ifndef _LOCAL_QUOTE_STRUCT_
+#define _LOCAL_QUOTE_STRUCT_
 #include "local_quote_struct.h"
+#endif
 // 回测数据结构
 #include "quote_api_struct.h"
 

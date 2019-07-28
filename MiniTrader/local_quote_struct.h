@@ -5,7 +5,7 @@
 #define LOCAL_NAMESIZE 16
 #include <stdint.h>
 ///快照行情
-typedef struct SnapDataStruct
+struct SnapData
 {
     // 代码
     ///交易所代码
@@ -43,10 +43,10 @@ typedef struct SnapDataStruct
     double	turnover;
     ///当日均价=(turnover/qty)
     double	avg_price;
-} SnapData;
+};
 
 ///10档行情
-typedef struct LevelDataStruct
+struct LevelData
 {
     // 代码
     ///交易所代码
@@ -80,7 +80,7 @@ typedef struct LevelDataStruct
     // 卖一队列总委托笔数
     int max_ask1_count;
 
-} LevelData;
+};
 
 ///股票行情静态信息
 struct StockInfo {

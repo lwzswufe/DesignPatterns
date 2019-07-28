@@ -30,7 +30,8 @@ public:
 	///@param ask1_count 卖一队列的有效委托笔数
 	///@param max_ask1_count 卖一队列总委托笔数
 	///@remark 需要快速返回，否则会堵塞后续消息，当堵塞严重时，会触发断线
-	virtual void OnDepthMarketData(MarketData *market_data, int64_t bid1_qty[], int32_t bid1_count, int32_t max_bid1_count, int64_t ask1_qty[], int32_t ask1_count, int32_t max_ask1_count) {};
+	//virtual void OnDepthMarketData(DepthMarketData *market_data, int64_t bid1_qty[], int32_t bid1_count, int32_t max_bid1_count, int64_t ask1_qty[], int32_t ask1_count, int32_t max_ask1_count) {};
+	virtual void OnDepthMarketData(DepthMarketData *market_data) {};
 
 	///逐笔行情通知，包括股票、指数和期权
 	///@param tbt_data 逐笔行情数据，包括逐笔委托和逐笔成交，此为共用结构体，需要根据type来区分是逐笔委托还是逐笔成交，需要快速返回，否则会堵塞后续消息，当堵塞严重时，会触发断线
@@ -54,36 +55,15 @@ public:
 	///@remark 如果一个账户需要在多个客户端登录，请使用不同的client_id，系统允许一个账户同时登录多个客户端，但是对于同一账户，相同的client_id只能保持一个session连接，后面的登录在前一个session存续期间，无法连接
 	static QuoteApi *CreateQuoteApi(const char *inifile);
 
-	///删除接口对象本身
-	///@remark 不再使用本接口对象时,调用该函数删除接口对象
-	virtual void Release() = 0;
-
-
-	///获取当前
+	///获取当前时间
 	virtual int GetClock() = 0;
-
-	///获取API的系统错误
-	///@return 返回的错误信息，可以在Login、Logout、订阅、取消订阅失败时调用，获取失败的原因
-	///@remark 可以在调用api接口失败时调用，例如login失败时
-	virtual ErrorInfo *GetApiLastError() = 0;
-
-	///设置采用UDP方式连接时的接收缓冲区大小
-	///@remark 需要在Login之前调用，默认大小和最小设置均为64MB。此缓存大小单位为MB，请输入2的次方数，例如128MB请输入128。
-	virtual void SetUDPBufferSize(uint32_t buff_size) = 0;
 
 	///注册回调接口
 	///@param spi 派生自回调接口类的实例，请在登录之前设定
 	virtual void RegisterSpi(QuoteSpi *spi) = 0;
 
-	///设置心跳检测时间间隔，单位为秒
-	///@param interval 心跳检测时间间隔，单位为秒
-	///@remark 此函数必须在Login之前调用
-	virtual void SetHeartBeatInterval(uint32_t interval) = 0;
-
-
 	///用户登录请求
 	virtual int Login() = 0;
-
 
 	///登出请求
 	///@return 登出是否成功，“0”表示登出成功，非“0”表示登出出错，此时用户可以调用GetApiLastError()来获取错误代码
