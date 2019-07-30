@@ -6,20 +6,29 @@
 #define _READ_INI_H_
 #include "Read_ini.h"
 #endif
+#include <iostream>
+using std::cout; using std::endl;
 
 Quote_Generator::Quote_Generator(const char* ini_file)
 {   
     IniType conf = Read_ini(ini_file);
-    const char *dir_ = conf["main"]["basktest_dir_linux"].c_str();
+    show_ini(conf);
+    const char *dir_ = conf["main"]["backtest_dir_linux"].c_str();
     this->dirname = new char[256];
     strncpy(this->dirname, dir_, strlen(dir_));
+    printf("data dir:%s\n", this->dirname);
     this->datenum = GetIntFromKey(conf["main"], "backtest_date");
     if (this->datenum > 20300101 || this->datenum < 20000101)
     {
         printf("error date:%d", this->datenum);
+        throw runtime_error("error date");
     }
+    else
+        printf("backtest date :%d\n", this->datenum);
     // 初始化时间为上午九点
-    this->time_now = this->datenum * 1000000 * 1000 + 90000 * 1000;
+    // this->time_now = this->datenum * 1000000 * 1000 + 90000 * 1000;
+    this->time_now = 90000 * 1000;
+    printf("init time:%ld\n", this->time_now);
     // 数组指针初始化
     this->stockinfo_array = NULL;
     this->snapdata_array = NULL;

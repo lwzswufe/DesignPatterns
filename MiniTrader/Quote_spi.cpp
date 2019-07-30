@@ -34,59 +34,7 @@ void MyQuoteSpi::OnDisconnected(int reason)
 
 void MyQuoteSpi::OnQueryAllTickers(StockStaticInfo * ticker_info, ErrorInfo * error_info, bool is_last)
 {   // 查询可交易合约的应答
-    static int sh_stock_num = 0, sz_stock_num = 0, ST_stock_num = 0;
-    static int err_num = 0;
 
-    // if (check_code(ticker_info))
-    // {   
-    //     Code_Ptr code = ticker_info->ticker;
-    //     if (ticker_info->pre_close_price < 0.01 ||
-    //         ticker_info->upper_limit_price / ticker_info->pre_close_price < 1.090)
-    //     {   
-    //         ST_stock_num++;
-    //         if (ST_stock_num < 5)
-    //         {
-    //             char s[256];
-    //             sprintf(s, "find ST stock:%s preclose:%.2lf uplimit:%.2lf", 
-    //                     code, ticker_info->upper_limit_price, ticker_info->pre_close_price);
-    //             SendMsg(XTP_LOG_LEVEL_INFO, "Quote", s);
-    //         }
-    //     }
-    //     else
-    //     {
-    //         bool ret = Data::add_code(code);
-    //         if (ret)
-    //         {   
-    //             if (code[0] == '6')
-    //                 sh_stock_num++;
-    //             else
-    //                 sz_stock_num++;
-    //             Stock_Data_Ptr data_ptr = get_stock_static_info(ticker_info, is_last);
-    //         }
-    //         else
-    //         {
-    //             err_num++;
-    //             if (err_num < 10)
-    //                 printf("------get error code:%s -----\n", code);
-    //         }
-    //     }
-    // }
-    // if (is_last)
-    // {
-    //     char s[256];
-    //     if(ticker_info->exchange_id == EXCHANGE_SH)
-    //     {   
-    //         sprintf(s, "Successful GET_ALL_SH_STOCK stock_num:%d", sh_stock_num);
-    //         GET_ALL_SH_STOCK = true;
-    //         SendMsg(XTP_LOG_LEVEL_INFO, "Quote", s);
-    //     }
-    //     else if (ticker_info->exchange_id == EXCHANGE_SZ)
-    //     {   
-    //         sprintf(s, "Successful GET_ALL_SZ_STOCK stock_num:%d", sz_stock_num);
-    //         GET_ALL_SZ_STOCK = true;
-    //         SendMsg(XTP_LOG_LEVEL_INFO, "Quote", s);
-    //     }
-    // }
 }
 
 void MyQuoteSpi::OnDepthMarketData(DepthMarketData * market_data, int64_t bid1_qty[], int32_t bid1_count, 

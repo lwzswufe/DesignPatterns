@@ -56,7 +56,7 @@ public:
 	static QuoteApi *CreateQuoteApi(const char *inifile);
 
 	///获取当前时间
-	virtual int GetClock() = 0;
+	virtual double GetClock() = 0;
 
 	///注册回调接口
 	///@param spi 派生自回调接口类的实例，请在登录之前设定

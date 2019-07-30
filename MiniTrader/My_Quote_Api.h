@@ -7,7 +7,7 @@ class Quote_Generator;
 struct Quote_Push_Param_Struct
 {
     bool  push_status;                      // 推送状态 true推送  false不推送
-    int  clock;                             // 
+    double  clock;                          // HHMMSS.sss
 	const char* ini_file;					// 配置文件
     QuoteSpi* spi;                          // 行情回调类
 };
@@ -23,7 +23,7 @@ class MyQuoteApi :public QuoteApi
 public:
     MyQuoteApi(const char* ini_file);
 
-    int GetClock();
+    double GetClock();
 
 	void RegisterSpi(QuoteSpi *spi);
 
@@ -44,4 +44,6 @@ private:
 	Quote_Push_Param_Struct quote_param;
 	// 配置文件
 	const char* ini_file;
+	// 子线程启动状态
+	bool quote_pthread_status;
 };

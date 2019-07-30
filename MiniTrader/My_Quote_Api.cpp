@@ -4,9 +4,9 @@
 #include "My_Quote_Api.h"
 #include "local_quote_convert.h"
 
-QuoteApi * QuoteApi::CreateQuoteApi(const char *inifile)
+QuoteApi * QuoteApi::CreateQuoteApi(const char *ini_file)
 {   
-    return new MyQuoteApi(inifile);
+    return new MyQuoteApi(ini_file);
 }
 
 void MyQuoteApi::RegisterSpi(QuoteSpi *spi)
@@ -16,7 +16,6 @@ void MyQuoteApi::RegisterSpi(QuoteSpi *spi)
 
 int MyQuoteApi::Login()
 {
-    this->start_push_quote_thread();
     return 0;
 }
 
@@ -27,15 +26,21 @@ int MyQuoteApi::Logout()
 }
 
 MyQuoteApi::MyQuoteApi(const char* ini_file)
-{
+{   
+    this->quote_pthread_status = false;
     this->quote_param.push_status = true;
     this->quote_param.clock = 0;
-    this->ini_file = ini_file;
+    this->quote_param.ini_file = ini_file;
     this->quote_param.spi = NULL;
 }
 
 void MyQuoteApi::start_push_quote_thread()
 {   
+    if (this->quote_pthread_status)
+    {
+        printf("push_quote_thread has started\n");
+        return;
+    }
     pthread_t pid_quote;      
     int pthread_ret;
     this->quote_param.spi = this->_spi;
@@ -45,7 +50,8 @@ void MyQuoteApi::start_push_quote_thread()
         printf("Create pthread_quote error!\n");
     }
     else 
-    {
+    {   
+        this->quote_pthread_status = true;
         printf("Create pthread_quote successful!\n");
     }
 }
@@ -54,6 +60,7 @@ void MyQuoteApi::close_push_quote_thread()
 {
     this->quote_param.push_status = false;
     printf("stop pthread_quote\n");
+    this->quote_pthread_status = false;
 }
 
 int MyQuoteApi::QueryAllTickers(EXCHANGE_TYPE exchange_id)
@@ -63,7 +70,7 @@ int MyQuoteApi::QueryAllTickers(EXCHANGE_TYPE exchange_id)
 }
 
 
-int MyQuoteApi::GetClock()
+double MyQuoteApi::GetClock()
 {   
     return ApiTimenum;
 }
@@ -79,7 +86,8 @@ int GetTimenum()
 void *task_push_quote(void* arg)
 {   
     Quote_Push_Param_Struct *param = (Quote_Push_Param_Struct*)arg;
-    int * clock_ptr = &(param->clock);
+    printf("ini_file:%s\n", param->ini_file);
+    double * clock_ptr = &(param->clock);
     QuoteSpi* spi = param->spi;
     Quote_Generator generator(param->ini_file);
     // xtp数据指针
@@ -107,7 +115,9 @@ void *task_push_quote(void* arg)
     }
     generator.load_data(is_am);
     // 开始推送行情
-    while(generator.Get_Clock() < 150000.00)
+    *clock_ptr = generator.Get_Clock();
+    printf("quote_push_thread start time:%.3lf\n", *clock_ptr);
+    while(*clock_ptr < 150000.00)
     {   // 判断是否需要载入下午的数据
         if (generator.check_is_need_load_data())
         {   
@@ -146,6 +156,7 @@ void *task_push_quote(void* arg)
         // 设置时间
         *clock_ptr = generator.Get_Clock();
         ApiTimenum = *clock_ptr;
+        printf("quote_push_thread time:%.3lf\n", *clock_ptr);
         // SetCurrentTime(generator.Get_Time());
     }
     printf("%s end\n", __func__);

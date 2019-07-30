@@ -30,8 +30,10 @@ StockInfo* read_stock_info_from_file(const char* filename, const int date, int *
     memset(stockinfo_ptr_arr, 0, sizeof(StockInfo *) * QUOTE_BLOCKNUM);
     pFile = fopen(filename , "r");
     if ( pFile == NULL ) 
-    {
-        perror("Error opening file");
+    {   
+        char s[256];
+        sprintf(s, "Error opening file:%s", filename);
+        perror(s);
         return NULL;
     }
     // 首次分配空间
@@ -92,7 +94,7 @@ SnapData* read_snap_data_from_file(const char* filename, int *array_size)
     pFile = fopen(filename , "r");
     if ( pFile == NULL ) 
     {
-        perror("Error opening file");
+                char s[256];         sprintf(s, "Error opening file:%s", filename);         perror(s);
         return NULL;
     }
     // 首次分配空间
@@ -151,7 +153,9 @@ LevelData* read_level_data_from_file(const char* filename, int *array_size)
     pFile = fopen(filename , "r");
     if ( pFile == NULL ) 
     {
-        perror("Error opening file");
+        char s[256];         
+        sprintf(s, "Error opening file:%s", filename);         
+        perror(s);
         return NULL;
     }
     // 首次分配空间
@@ -212,7 +216,9 @@ TickOrder* read_tick_order_from_file(const char* filename, int *array_size)
     pFile = fopen(filename , "r");
     if ( pFile == NULL ) 
     {
-        perror("Error opening file");
+        char s[256];         
+        sprintf(s, "Error opening file:%s", filename);         
+        perror(s);
         return NULL;
     }
     // 首次分配空间
@@ -272,7 +278,9 @@ TickTrade* read_tick_trade_from_file(const char* filename, int *array_size)
     pFile = fopen(filename , "r");
     if ( pFile == NULL ) 
     {
-        perror("Error opening file");
+        char s[256];         
+        sprintf(s, "Error opening file:%s", filename);         
+        perror(s);
         return NULL;
     }
     // 首次分配空间
