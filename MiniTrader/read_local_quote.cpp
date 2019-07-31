@@ -142,6 +142,7 @@ SnapData* read_snap_data_from_file(const char* filename, int *array_size)
     *array_size = total_num;
     // 末元素充值为0
     memset(snapdata_ptr+total_num, 0, sizeof(SnapData));
+    printf("get %ld snap data\n", total_num);
     return snapdata_ptr;
 }
 

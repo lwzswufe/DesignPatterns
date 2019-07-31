@@ -117,7 +117,7 @@ void *task_push_quote(void* arg)
     // 开始推送行情
     *clock_ptr = generator.Get_Clock();
     printf("quote_push_thread start time:%.3lf\n", *clock_ptr);
-    while(*clock_ptr < 150000.00)
+    while(*clock_ptr < 150000.00 && param->push_status)
     {   // 判断是否需要载入下午的数据
         if (generator.check_is_need_load_data())
         {   
@@ -143,7 +143,7 @@ void *task_push_quote(void* arg)
             spi->OnTickByTick(tick_ptr);
             ticktrade_ptr = generator.Get_TickTrade();
         }
-
+        
         snap_ptr = generator.Get_SnapData();
         level_ptr = generator.Get_LevelData();
         while(snap_ptr != NULL && level_ptr != NULL)
@@ -155,7 +155,7 @@ void *task_push_quote(void* arg)
         }
         // 设置时间
         *clock_ptr = generator.Get_Clock();
-        ApiTimenum = *clock_ptr;
+        ApiTimenum = generator.Get_Timenum();
         // SetCurrentTime(generator.Get_Time());
         generator.update_time();
     }

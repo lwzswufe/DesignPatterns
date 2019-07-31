@@ -10,6 +10,8 @@ public:
     void load_data(bool is_am);
     // 判断是否需要载入数据 若所有数据指针都为NULL就返回true 否则返回false
     bool check_is_need_load_data();
+    // 获取当前时间 HHMMSS
+    int Get_Timenum();
     // 获取当前时间 yyyymmddHHMMSSsss
     int64_t Get_Time();
     // 获取当前时刻 HHMMSS.sss

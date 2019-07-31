@@ -104,6 +104,11 @@ int64_t Quote_Generator::Get_Time()
     return this->time_now;
 }
 
+int Quote_Generator::Get_Timenum()
+{
+    return (this->time_now % 1000000000) / 1000;
+}
+
 double Quote_Generator::Get_Clock()
 {
     double now = (this->time_now % 1000000000) / 1000.0;
@@ -130,7 +135,9 @@ const StockInfo* Quote_Generator::Get_StockInfo()
 const TickOrder* Quote_Generator::Get_TickOrder()
 {   
     if (this->tickorder_ptr == NULL)
+    {   
         return NULL;
+    }
     if (this->tickorder_ptr->data_time > 0)
     {   // 若当前数据时间小于等于系统时间 就返回当前指针 再++当前指针 
 
@@ -163,7 +170,9 @@ const TickOrder* Quote_Generator::Get_TickOrder()
 const TickTrade* Quote_Generator::Get_TickTrade()
 {   
     if (this->ticktrade_ptr == NULL)
+    {   
         return NULL;
+    }
     if (this->ticktrade_ptr->data_time > 0)
     {   // 若当前数据时间小于等于系统时间 就返回当前指针 再++当前指针 
 
@@ -189,6 +198,7 @@ const TickTrade* Quote_Generator::Get_TickTrade()
         this->ticktrade_array = NULL;
         this->ticktrade_ptr = NULL;
         printf("release TickTrade Array\n");
+        return NULL;
     }
 }
 
@@ -222,6 +232,7 @@ const SnapData* Quote_Generator::Get_SnapData()
         this->snapdata_array = NULL;
         this->snapdata_ptr = NULL;
         printf("release SnapData Array\n");
+        return NULL;
     }
 }
 
@@ -255,6 +266,7 @@ const LevelData* Quote_Generator::Get_LevelData()
         this->leveldata_array = NULL;
         this->leveldata_ptr = NULL;
         printf("release LevelData Array\n");
+        return NULL;
     }
 }
 

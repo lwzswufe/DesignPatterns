@@ -11,6 +11,7 @@ extern int GetTimenum();
 
 int main_program()
 {   
+    ApiTimenum = 0;
     int last_timenum = 0, now_timenum;
     const char filename[256] = "Trade.ini";
     QuoteApi* api_ = QuoteApi::CreateQuoteApi(filename);
@@ -22,13 +23,14 @@ int main_program()
     printf("timenum:%d\n", now_timenum);
     while (GetTimenum() < 145700)
     {
-        if (last_timenum + 500 < now_timenum)
+        if (last_timenum + 100 < now_timenum)
         {   
             last_timenum = now_timenum;
             printf("timenum:%d\n", now_timenum);
         }
         now_timenum = GetTimenum();
     }
+    printf("timenum:%d  timeout\n", now_timenum);
     api_->Logout();
     printf("%s test over", __FILE__);
     return 0;
