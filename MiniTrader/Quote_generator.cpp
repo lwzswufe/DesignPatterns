@@ -66,6 +66,7 @@ void Quote_Generator::load_data(bool is_am)
     {
         timetype = pm;
     }
+    printf("load %d %s data....\n", this->datenum, timetype);
     int year = this->datenum / 10000;
     int month = this->datenum % 10000 / 100;
     int date = this->datenum % 100;
@@ -84,6 +85,7 @@ void Quote_Generator::load_data(bool is_am)
     this->leveldata_ptr = this->leveldata_array;
     this->tickorder_ptr = this->tickorder_array;
     this->ticktrade_ptr = this->ticktrade_array;
+    printf("load %d %s data over\n", this->datenum, timetype);
 }
 
 bool Quote_Generator::check_is_need_load_data()
@@ -127,17 +129,22 @@ const StockInfo* Quote_Generator::Get_StockInfo()
 
 const TickOrder* Quote_Generator::Get_TickOrder()
 {   
+    if (this->tickorder_ptr == NULL)
+        return NULL;
     if (this->tickorder_ptr->data_time > 0)
     {   // 若当前数据时间小于等于系统时间 就返回当前指针 再++当前指针 
-        if (this->tickorder_ptr != NULL && 
-            this->tickorder_ptr->data_time <= this->time_now)
+
+        if (this->tickorder_ptr->data_time <= this->time_now)
         {
             return this->tickorder_ptr++;
         }
         else 
         {   
-            // 若当前数据时间小于当前系统下一次推送行情时间 更新 系统下一次推送行情时间 为 当前数据时间
+            // 若下一个数据时间小于当前系统下一次推送行情时间 更新 系统下一次推送行情时间 为 下一个数据时间
             if ( this->time_next > this->tickorder_ptr->data_time )
+                this->time_next = this->tickorder_ptr->data_time;
+            // 系统下一次推送行情时间小于下一个数据的时间 设置 系统下一次推送行情时间 为 下一个数据的时间
+            else if (this->time_next <= this->time_now)
                 this->time_next = this->tickorder_ptr->data_time;
             return NULL;
         }
@@ -154,11 +161,13 @@ const TickOrder* Quote_Generator::Get_TickOrder()
 }
 
 const TickTrade* Quote_Generator::Get_TickTrade()
-{
+{   
+    if (this->ticktrade_ptr == NULL)
+        return NULL;
     if (this->ticktrade_ptr->data_time > 0)
     {   // 若当前数据时间小于等于系统时间 就返回当前指针 再++当前指针 
-        if (this->ticktrade_ptr != NULL && 
-            this->ticktrade_ptr->data_time <= this->time_now)
+
+        if (this->ticktrade_ptr->data_time <= this->time_now)
         {
             return this->ticktrade_ptr++;
         }
@@ -166,6 +175,9 @@ const TickTrade* Quote_Generator::Get_TickTrade()
         {   
             // 若当前数据时间小于当前系统下一次推送行情时间 更新 系统下一次推送行情时间 为 当前数据时间
             if ( this->time_next > this->ticktrade_ptr->data_time )
+                this->time_next = this->ticktrade_ptr->data_time;
+            // 系统下一次推送行情时间小于下一个数据的时间 设置 系统下一次推送行情时间 为 下一个数据的时间
+            else if (this->time_next <= this->time_now)
                 this->time_next = this->ticktrade_ptr->data_time;
             return NULL;
         }
@@ -181,11 +193,14 @@ const TickTrade* Quote_Generator::Get_TickTrade()
 }
 
 const SnapData* Quote_Generator::Get_SnapData()
-{
+{   
+    if (this->snapdata_ptr == NULL)
+    {
+        return NULL;
+    }
     if (this->snapdata_ptr->data_time > 0)
     {   // 若当前数据时间小于等于系统时间 就返回当前指针 再++当前指针 
-        if (this->snapdata_ptr != NULL && 
-            this->snapdata_ptr->data_time <= this->time_now)
+        if (this->snapdata_ptr->data_time <= this->time_now)
         {
             return this->snapdata_ptr++;
         }
@@ -193,6 +208,9 @@ const SnapData* Quote_Generator::Get_SnapData()
         {   
             // 若当前数据时间小于当前系统下一次推送行情时间 更新 系统下一次推送行情时间 为 当前数据时间
             if ( this->time_next > this->snapdata_ptr->data_time )
+                this->time_next = this->snapdata_ptr->data_time;
+            // 系统下一次推送行情时间小于下一个数据的时间 设置 系统下一次推送行情时间 为 下一个数据的时间
+            else if (this->time_next <= this->time_now)
                 this->time_next = this->snapdata_ptr->data_time;
             return NULL;
         }
@@ -208,11 +226,14 @@ const SnapData* Quote_Generator::Get_SnapData()
 }
 
 const LevelData* Quote_Generator::Get_LevelData()
-{
+{   
+    if (this->leveldata_ptr == NULL)
+    {
+        return NULL;
+    }
     if (this->leveldata_ptr->data_time > 0)
     {   // 若当前数据时间小于等于系统时间 就返回当前指针 再++当前指针 
-        if (this->leveldata_ptr != NULL && 
-            this->leveldata_ptr->data_time <= this->time_now)
+        if (this->leveldata_ptr->data_time <= this->time_now)
         {
             return this->leveldata_ptr++;
         }
@@ -220,6 +241,9 @@ const LevelData* Quote_Generator::Get_LevelData()
         {   
             // 若当前数据时间小于当前系统下一次推送行情时间 更新 系统下一次推送行情时间 为 当前数据时间
             if ( this->time_next > this->leveldata_ptr->data_time )
+                this->time_next = this->leveldata_ptr->data_time;
+            // 系统下一次推送行情时间小于下一个数据的时间 设置 系统下一次推送行情时间 为 下一个数据的时间
+            else if (this->time_next <= this->time_now)
                 this->time_next = this->leveldata_ptr->data_time;
             return NULL;
         }
@@ -234,3 +258,8 @@ const LevelData* Quote_Generator::Get_LevelData()
     }
 }
 
+void Quote_Generator::update_time()
+{
+    // printf("update time  %lld  to  %lld\n", this->time_now, this->time_next);
+    this->time_now = this->time_next;
+}

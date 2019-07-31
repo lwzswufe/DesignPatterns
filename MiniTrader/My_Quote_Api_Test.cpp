@@ -20,10 +20,13 @@ int main_program()
     api_->QueryAllTickers(EXCHANGE_SZ);
     now_timenum = GetTimenum();
     printf("timenum:%d\n", now_timenum);
-    while (GetTimenum() < 93006)
+    while (GetTimenum() < 145700)
     {
-        if (last_timenum < now_timenum)
+        if (last_timenum + 500 < now_timenum)
+        {   
+            last_timenum = now_timenum;
             printf("timenum:%d\n", now_timenum);
+        }
         now_timenum = GetTimenum();
     }
     api_->Logout();

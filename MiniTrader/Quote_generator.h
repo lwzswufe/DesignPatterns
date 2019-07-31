@@ -24,6 +24,8 @@ public:
     const SnapData* Get_SnapData();
     // 获取深度行情数据
     const LevelData* Get_LevelData();
+    // 更新时间
+    void update_time();
 private:
     // 配置文件名
     char * dirname;

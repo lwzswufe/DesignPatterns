@@ -94,7 +94,9 @@ SnapData* read_snap_data_from_file(const char* filename, int *array_size)
     pFile = fopen(filename , "r");
     if ( pFile == NULL ) 
     {
-                char s[256];         sprintf(s, "Error opening file:%s", filename);         perror(s);
+        char s[256];        
+        sprintf(s, "Error opening file:%s", filename);         
+        perror(s);
         return NULL;
     }
     // 首次分配空间
@@ -263,7 +265,7 @@ TickOrder* read_tick_order_from_file(const char* filename, int *array_size)
     *array_size = total_num;
     // 末元素充值为0
     memset(tickorder_ptr+total_num, 0, sizeof(TickOrder));
-    printf("get %ld level data\n", total_num);
+    printf("get %ld tickorder data\n", total_num);
     return tickorder_ptr;
 }
 
@@ -325,7 +327,7 @@ TickTrade* read_tick_trade_from_file(const char* filename, int *array_size)
     *array_size = total_num;
     // 末元素充值为0
     memset(ticktrade_ptr+total_num, 0, sizeof(TickTrade));
-    printf("get %ld level data\n", total_num);
+    printf("get %ld ticktrade data\n", total_num);
     return ticktrade_ptr;
 }
 

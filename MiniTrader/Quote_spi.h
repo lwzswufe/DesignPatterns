@@ -17,9 +17,8 @@ public:
 
     void OnQueryAllTickers(StockStaticInfo* ticker_info, ErrorInfo *error_info, bool is_last);
 
-	void OnDepthMarketData(DepthData *market_data, int64_t bid1_qty[], int32_t bid1_count, 
-                                                    int32_t max_bid1_count, int64_t ask1_qty[], 
-                                                    int32_t ask1_count, int32_t max_ask1_count);
+	void OnDepthMarketData(DepthData *market_data);
+	
 	void OnTickByTick(TickByTick *tbt_data);
 
 private:

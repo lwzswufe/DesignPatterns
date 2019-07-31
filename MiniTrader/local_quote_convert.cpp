@@ -118,7 +118,7 @@ void convert_tickorder(const TickOrder* tickorder_ptr, TickByTickStruct * tick_p
     // 委托 or 成交
     tick_ptr->type = TBT_ENTRUST;
     ///委托序号(在同一个channel_no内唯一，从1开始连续)
-    tick_ptr->order.seq = tick_ptr->seq;
+    tick_ptr->order.seq = tickorder_ptr->seq;
     ///委托价格
     tick_ptr->order.price = tickorder_ptr->price;
     ///委托数量
@@ -147,7 +147,7 @@ void convert_ticktrade(const TickTrade* ticktrade_ptr, TickByTickStruct * tick_p
     // 委托 or 成交
     tick_ptr->type = TBT_TRADE;
     // 成交序号(在同一个channel_no内唯一，从1开始连续)
-    tick_ptr->trade.seq = tick_ptr->seq;
+    tick_ptr->trade.seq = ticktrade_ptr->seq;
     // 成交价格
     tick_ptr->trade.price = ticktrade_ptr->price;
     // 成交数量

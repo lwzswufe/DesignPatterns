@@ -106,6 +106,7 @@ void *task_push_quote(void* arg)
     pthread_t pid = pthread_self();
     printf("%s start\n", __func__);
     // 推送股票信息
+    generator.load_data(is_am);
     info_ptr = generator.Get_StockInfo();
     while (info_ptr != NULL)
     {   
@@ -113,7 +114,6 @@ void *task_push_quote(void* arg)
         spi->OnQueryAllTickers(stockinfo_ptr, &errorinfo, is_last);
         info_ptr = generator.Get_StockInfo();
     }
-    generator.load_data(is_am);
     // 开始推送行情
     *clock_ptr = generator.Get_Clock();
     printf("quote_push_thread start time:%.3lf\n", *clock_ptr);
@@ -156,8 +156,8 @@ void *task_push_quote(void* arg)
         // 设置时间
         *clock_ptr = generator.Get_Clock();
         ApiTimenum = *clock_ptr;
-        printf("quote_push_thread time:%.3lf\n", *clock_ptr);
         // SetCurrentTime(generator.Get_Time());
+        generator.update_time();
     }
     printf("%s end\n", __func__);
     pthread_exit(0);
