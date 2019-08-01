@@ -1,6 +1,6 @@
 #ifndef QUOTE_API_H_
 #define QUOTE_API_H_
-#include "quote_api_struct.h"
+#include "Quote_Api_Struct.h"
 
 /*!
 * \class ::API::QuoteSpi

@@ -1,5 +1,5 @@
-#include "Quote_api.h"
-#include "Quote_spi.h"
+#include "Quote_Api.h"
+#include "Quote_Spi.h"
 #include "Quote_generator.h"
 
 class Quote_Generator;

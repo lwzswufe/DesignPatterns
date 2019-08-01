@@ -1,6 +1,4 @@
-#pragma once
-#include "Quote_api.h"
-
+#include "Quote_Api.h"
 
 #define NUM_OF_ROUND 1
 

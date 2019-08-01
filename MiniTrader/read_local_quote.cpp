@@ -341,8 +341,8 @@ bool read_stock_info_from_line(char* line, StockInfo* stockinfo_ptr, const int d
     market = line[8];
     switch(market)
     {
-        case 'H': stockinfo_ptr->exchange_id = STOCK_EXCHANGE_SH; break;
-        case 'Z': stockinfo_ptr->exchange_id = STOCK_EXCHANGE_SZ; break;
+        case 'H': stockinfo_ptr->exchange_id = LOCAL_EXCHANGE_SH; break;
+        case 'Z': stockinfo_ptr->exchange_id = LOCAL_EXCHANGE_SZ; break;
         default : return false;
     }
     strncpy(stockinfo_ptr->code, line, 6);
@@ -404,8 +404,8 @@ bool read_snap_data_from_line(char* line, SnapData* ptr)
     switch(code[0])
     {
         case '0': 
-        case '3': ptr->exchange_id = STOCK_EXCHANGE_SZ; break;
-        case '6': ptr->exchange_id = STOCK_EXCHANGE_SH; break;
+        case '3': ptr->exchange_id = LOCAL_EXCHANGE_SZ; break;
+        case '6': ptr->exchange_id = LOCAL_EXCHANGE_SH; break;
         default : return false;
     }
     strncpy(ptr->code, code, 6);
@@ -437,8 +437,8 @@ bool read_level_data_from_line(char* line, LevelData* ptr)
     switch(code[0])
     {
         case '0': 
-        case '3': ptr->exchange_id = STOCK_EXCHANGE_SZ; break;
-        case '6': ptr->exchange_id = STOCK_EXCHANGE_SH; break;
+        case '3': ptr->exchange_id = LOCAL_EXCHANGE_SZ; break;
+        case '6': ptr->exchange_id = LOCAL_EXCHANGE_SH; break;
         default : return false;
     }
     strncpy(ptr->code, code, 6);
@@ -481,6 +481,7 @@ bool read_tick_order_from_line(char* line, TickOrder* ptr)
     line += 72;
     match_num = sscanf(line, "%*d\t%*d\t%ld\t%d\t%*d\t%lf\t%ld\t%c\t%c",
                         &(ptr->seq), &codenum, &(ptr->price), &(ptr->qty), &(ptr->side), &(ptr->type));
+    ptr->seq *= QUOTE_SEQ_MULTIPLE;
     if (match_num < 6)
         return false;
     // 获取市场与证券代码
@@ -489,8 +490,8 @@ bool read_tick_order_from_line(char* line, TickOrder* ptr)
     switch(code[0])
     {
         case '0': 
-        case '3': ptr->exchange_id = STOCK_EXCHANGE_SZ; break;
-        case '6': ptr->exchange_id = STOCK_EXCHANGE_SH; break;
+        case '3': ptr->exchange_id = LOCAL_EXCHANGE_SZ; break;
+        case '6': ptr->exchange_id = LOCAL_EXCHANGE_SH; break;
         default : return false;
     }
     strncpy(ptr->code, code, 6);
@@ -511,6 +512,9 @@ bool read_tick_trade_from_line(char* line, TickTrade* ptr)
     line += 72;
     match_num = sscanf(line, "%*d\t%*d\t%ld\t%d\t%*d\t%ld\t%ld\t%lf\t%ld\t%c",
                         &(ptr->seq), &codenum, &(ptr->bid_no), &(ptr->ask_no), &(ptr->price), &(ptr->qty), &(ptr->type));
+    ptr->seq *= QUOTE_SEQ_MULTIPLE;
+    ptr->ask_no *= QUOTE_SEQ_MULTIPLE;
+    ptr->bid_no *= QUOTE_SEQ_MULTIPLE;
     if (match_num < 6)
         return false;
     // 获取市场与证券代码
@@ -519,8 +523,8 @@ bool read_tick_trade_from_line(char* line, TickTrade* ptr)
     switch(code[0])
     {
         case '0': 
-        case '3': ptr->exchange_id = STOCK_EXCHANGE_SZ; break;
-        case '6': ptr->exchange_id = STOCK_EXCHANGE_SH; break;
+        case '3': ptr->exchange_id = LOCAL_EXCHANGE_SZ; break;
+        case '6': ptr->exchange_id = LOCAL_EXCHANGE_SH; break;
         default : return false;
     }
     strncpy(ptr->code, code, 6);

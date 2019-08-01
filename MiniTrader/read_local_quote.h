@@ -5,6 +5,7 @@
 #define QUOTE_LINESIZE 1024
 #define QUOTE_BLOCKSIZE 1024
 #define QUOTE_BLOCKNUM 32768
+#define QUOTE_SEQ_MULTIPLE 10
 
 // 从文件里读取股票静态信息
 // const char* filename 文件名
