@@ -3,6 +3,8 @@
 #define LOCAL_EXCHANGE_SZ 2
 #define LOCAL_CODESIZE 8
 #define LOCAL_NAMESIZE 16
+#define LOCAL_TRADETYPE_DEAL 'F'
+#define LOCAL_TRADETYPE_CANCEL '4'
 #include <stdint.h>
 ///快照行情
 struct SnapData

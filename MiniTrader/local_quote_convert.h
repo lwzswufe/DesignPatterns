@@ -6,7 +6,7 @@
 #include "local_quote_struct.h"
 #endif
 // 回测数据结构
-#include "quote_api_struct.h"
+#include "Quote_Api_Struct.h"
 
 // 转换股票静态信息数据
 void convert_stockinfo(const StockInfo* stockinfo_ptr, StockStaticInfo * stockstaticinfo_ptr, bool* is_last);

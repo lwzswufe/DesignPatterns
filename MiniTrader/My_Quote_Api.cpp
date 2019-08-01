@@ -3,6 +3,7 @@
 #include <memory>
 #include "My_Quote_Api.h"
 #include "local_quote_convert.h"
+#include "generator_global.h"
 
 QuoteApi * QuoteApi::CreateQuoteApi(const char *ini_file)
 {   
@@ -87,6 +88,14 @@ void *task_push_quote(void* arg)
 {   
     Quote_Push_Param_Struct *param = (Quote_Push_Param_Struct*)arg;
     printf("ini_file:%s\n", param->ini_file);
+    Sim::initial_generator_data();
+    Sim::quote_start = true;
+    printf("SIM::quote_start\n")
+    // wait for start trade
+    // while (!Sim::trade_start)
+    // {
+    //     sleep(1);
+    // }
     double * clock_ptr = &(param->clock);
     QuoteSpi* spi = param->spi;
     Quote_Generator generator(param->ini_file);
@@ -127,6 +136,14 @@ void *task_push_quote(void* arg)
                 generator.load_data(is_am);
             }
         }
+        // 推送用户行情数据
+        while(Sim::tickorder_read_num < Sim::tickorder_vec.size())
+        {
+            tickorder_ptr = Sim::tickorder_vec[Sim::tickorder_read_num]
+            Sim::tickorder_read_num++;
+            convert_tickorder(tickorder_ptr, tick_ptr);
+            spi->OnTickByTick(tick_ptr);
+        }
         // 推送行情数据
         tickorder_ptr = generator.Get_TickOrder();
         while(tickorder_ptr != NULL)
@@ -134,16 +151,25 @@ void *task_push_quote(void* arg)
             convert_tickorder(tickorder_ptr, tick_ptr);
             spi->OnTickByTick(tick_ptr);
             tickorder_ptr = generator.Get_TickOrder();
+        } 
+        // 推送用户成交数据
+        while(Sim::ticktrade_read_num < Sim::ticktrade_vec.size())
+        {
+            ticktrade_ptr = Sim::ticktrade_vec[Sim::ticktrade_read_num]
+            Sim::ticktrade_read_num++;
+            convert_tickorder(ticktrade_ptr, tick_ptr);
+            spi->OnTickByTick(tick_ptr);
         }
-
+        // 推送成交流
         ticktrade_ptr = generator.Get_TickTrade();
         while(ticktrade_ptr != NULL)
         {   
+            Sim::set_lastest_ticktrade(ticktrade_ptr);
             convert_ticktrade(ticktrade_ptr, tick_ptr);
             spi->OnTickByTick(tick_ptr);
             ticktrade_ptr = generator.Get_TickTrade();
         }
-        
+        // 推送深度行情数据
         snap_ptr = generator.Get_SnapData();
         level_ptr = generator.Get_LevelData();
         while(snap_ptr != NULL && level_ptr != NULL)
