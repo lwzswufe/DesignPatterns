@@ -9,7 +9,7 @@ g++ local_quote_struct.h read_local_quote.h read_local_quote.cpp read_local_quot
 void test_stock_info(const char * filename)
 {
     int date = 20190110, stock_num = 0, total_num;
-    StockInfo* ptr = read_stock_info_from_file(filename, date, &total_num);
+    SimStockInfo* ptr = read_stock_info_from_file(filename, date, &total_num);
     while (ptr->pre_close_price > 0)
     {
         printf("code:%s Market:%d preclose:%.2lf\tuplimit:%.2lf\n", 
@@ -24,7 +24,7 @@ void test_stock_info(const char * filename)
 void test_snap_data(const char* filename)
 {
     int data_num = 0, snapdata_flag = 1, total_num;
-    SnapData* ptr = read_snap_data_from_file(filename, &total_num);
+    SimSnapData* ptr = read_snap_data_from_file(filename, &total_num);
     while (ptr->data_time > 0)
     {   
         data_num++;
@@ -43,7 +43,7 @@ void test_snap_data(const char* filename)
 void test_level_data(const char * filename)
 {
     int data_num = 0, leveldata_flag = 1, total_num;
-    LevelData* ptr = read_level_data_from_file(filename, &total_num);
+    SimLevelData* ptr = read_level_data_from_file(filename, &total_num);
     while (ptr->data_time > 0)
     {   
         data_num++;
@@ -67,7 +67,7 @@ void test_level_data(const char * filename)
 void test_tick_order(const char * filename)
 {
     int data_num = 0, flag = 1, total_num;
-    TickOrder* ptr = read_tick_order_from_file(filename, &total_num);
+    SimTickOrder* ptr = read_tick_order_from_file(filename, &total_num);
     while (ptr->data_time > 0)
     {   
         data_num++;
@@ -85,7 +85,7 @@ void test_tick_order(const char * filename)
 void test_tick_trade(const char * filename)
 {
     int data_num = 0, flag = 1, total_num;
-    TickTrade* ptr = read_tick_trade_from_file(filename, &total_num);
+    SimTickTrade* ptr = read_tick_trade_from_file(filename, &total_num);
     while (ptr->data_time > 0)
     {   
         data_num++;

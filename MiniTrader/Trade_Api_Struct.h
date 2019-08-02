@@ -99,7 +99,7 @@ struct TradeReport
     ///合约代码
     char                     ticker[TICKER_LEN];
     ///交易市场
-    MARKET_TYPE          market;
+    MARKET_TYPE              market;
     ///订单号，引入ID后，该字段实际和order__id重复。接口中暂时保留。
     uint64_t                 local_order_id;
     ///成交编号，深交所唯一，上交所每笔交易唯一，当发现2笔成交回报拥有相同的exec_id，则可以认为此笔交易自成交

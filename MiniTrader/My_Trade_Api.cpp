@@ -2,8 +2,8 @@
 #include <pthread.h>
 #include <memory>
 #include "My_Trade_Api.h"
-#include "generator_global.h"
-#include "local_trade_convert.h"
+#include "Trade_generator.h"
+#include "sim_trade_convert.h"
 
 TradeApi * TradeApi::CreateTradeApi(uint8_t client_id)
 {   
@@ -27,9 +27,9 @@ int MyTradeApi::Logout()
 
 uint64_t MyTradeApi::InsertOrder(OrderInsertInfo *order)
 {   
-    LocalOrder * localorder = new LocalOrder;
-    localorder = convert_order_struct(order);
-    return Sim::insert_order(localorder);
+    LocalOrder * simorder = new LocalOrder;
+    simorder = convert_order_struct(order);
+    return Sim::insert_order(simorder);
 }
 
 uint64_t MyTradeApi::CancelOrder(const uint64_t order__id)
@@ -85,12 +85,16 @@ void *task_push_trade(void* arg)
     printf("ini_file:%s\n", param->ini_file);
     double * clock_ptr = &(param->clock);
     TradeSpi* spi = param->spi;
-    TickTrade* latest_ticktrade, new_ticktrade;
-    LocalOrder* localorder;
+    
     // xtp数据指针
     bool is_last, is_am = true;
     ErrorInfo errorinfo;
+    TradeReport tradereport, *trade_info = &tradereport;
+    OrderInfo orderinfo, *order_info = &orderinfo;
     // 本地数据指针
+    SimTickTrade* latest_ticktrade, *new_ticktrade;
+    SimOrder* simorder;
+    vector<SimOrder*> traded_order_vec;
     // 线程id
     pthread_t pid = pthread_self();
     while(!Sim::quote_start)
@@ -99,24 +103,18 @@ void *task_push_trade(void* arg)
     }
     printf("%s start\n", __func__);
     while(Sim::quote_start)
-    {
-        for (auto iter: Sim::lastest_ticktrade_map)
-        {
-            if (iter.first == 0)
-                continue;
-            latest_ticktrade = Sim::get_lastest_ticktrade(iter.first);
-            if (latest_ticktrade == NULL)
-                continue;
-            // 遍历股票
-            for (auto localorder: Sim::order_map[iter.first])
-            {   // 模拟成交
-                new_ticktrade = Sim::simulate_trade(latest_ticktrade, localorder);
-                // 若成交
-                if (new_ticktrade != NULL);
-                {   // 推送成交事件
-                    spi->OnTradeEvent();
-                    spi->OnOrderEvent();
-                }
+    {   // 遍历股票
+
+            traded_order_vec = Sim::get_traded_order();
+                new_ticktrade = Sim::simulate_trade(latest_ticktrade, simorder);
+            // 若成交
+            if (new_ticktrade != NULL);
+            {   // 推送成交事件
+                trade_info = convert_trade_struct(simorder, new_ticktrade);
+                spi->OnTradeEvent(trade_info);
+                // 推送订单状态更新
+                order_info = convert_order_struct(simorder);
+                spi->OnOrderEvent(order_info);
             }
         }
         sleep(1);

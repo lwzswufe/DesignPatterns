@@ -21,13 +21,13 @@ void split_line_to_word_array(char* line, const char* separator, char** word_arr
         word_array[i] = NULL;
 }
 
-StockInfo* read_stock_info_from_file(const char* filename, const int date, int *array_size)
+SimStockInfo* read_stock_info_from_file(const char* filename, const int date, int *array_size)
 {
     FILE * pFile;
     char line[QUOTE_LINESIZE];
     size_t total_num = 0, block_num = 0, block_count = 0;
-    StockInfo* stockinfo_ptr_arr[QUOTE_BLOCKNUM];
-    memset(stockinfo_ptr_arr, 0, sizeof(StockInfo *) * QUOTE_BLOCKNUM);
+    SimStockInfo* stockinfo_ptr_arr[QUOTE_BLOCKNUM];
+    memset(stockinfo_ptr_arr, 0, sizeof(SimStockInfo *) * QUOTE_BLOCKNUM);
     pFile = fopen(filename , "r");
     if ( pFile == NULL ) 
     {   
@@ -37,7 +37,7 @@ StockInfo* read_stock_info_from_file(const char* filename, const int date, int *
         return NULL;
     }
     // 首次分配空间
-    StockInfo* stockinfo_ptr = new StockInfo[QUOTE_BLOCKSIZE];
+    SimStockInfo* stockinfo_ptr = new SimStockInfo[QUOTE_BLOCKSIZE];
     stockinfo_ptr_arr[block_num] = stockinfo_ptr;
     block_num++;
     while ( ! feof (pFile) )
@@ -55,7 +55,7 @@ StockInfo* read_stock_info_from_file(const char* filename, const int date, int *
             // 当前块block空间使用完毕 分配新block
             if ( block_count == QUOTE_BLOCKSIZE )
             {
-                stockinfo_ptr = new StockInfo[QUOTE_BLOCKSIZE];
+                stockinfo_ptr = new SimStockInfo[QUOTE_BLOCKSIZE];
                 stockinfo_ptr_arr[block_num] = stockinfo_ptr;
                 block_num++;
                 block_count = 0;
@@ -64,7 +64,7 @@ StockInfo* read_stock_info_from_file(const char* filename, const int date, int *
     }
     fclose (pFile);
     // 为所有数据分配新空间
-    stockinfo_ptr = new StockInfo[total_num+1];
+    stockinfo_ptr = new SimStockInfo[total_num+1];
     size_t block_size;
     // 依次将每一个块的数据拷贝到新空间中去
     for (int block_id=0; block_id<block_num; block_id++)
@@ -73,24 +73,24 @@ StockInfo* read_stock_info_from_file(const char* filename, const int date, int *
             block_size = QUOTE_BLOCKSIZE;
         else 
             block_size = block_count;
-        memcpy(stockinfo_ptr + QUOTE_BLOCKSIZE * block_id, stockinfo_ptr_arr[block_id], sizeof(StockInfo) * block_size);
+        memcpy(stockinfo_ptr + QUOTE_BLOCKSIZE * block_id, stockinfo_ptr_arr[block_id], sizeof(SimStockInfo) * block_size);
         delete[] stockinfo_ptr_arr[block_id];
     }
     *array_size = total_num;
     // 末元素充值为0
-    memset(stockinfo_ptr+total_num, 0, sizeof(StockInfo));
+    memset(stockinfo_ptr+total_num, 0, sizeof(SimStockInfo));
     printf("date:%d stock_num:%lu\n", date, total_num);
     return stockinfo_ptr;
 }
 
 // 从文件里读取深度行情
-SnapData* read_snap_data_from_file(const char* filename, int *array_size)
+SimSnapData* read_snap_data_from_file(const char* filename, int *array_size)
 {
     FILE * pFile;
     char line[QUOTE_LINESIZE];
     size_t total_num = 0, block_num = 0, block_count = 0;
-    SnapData* snapdata_ptr_arr[QUOTE_BLOCKNUM];
-    memset(snapdata_ptr_arr, 0, sizeof(SnapData *) * QUOTE_BLOCKNUM);
+    SimSnapData* snapdata_ptr_arr[QUOTE_BLOCKNUM];
+    memset(snapdata_ptr_arr, 0, sizeof(SimSnapData *) * QUOTE_BLOCKNUM);
     pFile = fopen(filename , "r");
     if ( pFile == NULL ) 
     {
@@ -100,7 +100,7 @@ SnapData* read_snap_data_from_file(const char* filename, int *array_size)
         return NULL;
     }
     // 首次分配空间
-    SnapData* snapdata_ptr = new SnapData[QUOTE_BLOCKSIZE];
+    SimSnapData* snapdata_ptr = new SimSnapData[QUOTE_BLOCKSIZE];
     snapdata_ptr_arr[block_num] = snapdata_ptr;
     block_num++;
     while ( ! feof (pFile) )
@@ -118,7 +118,7 @@ SnapData* read_snap_data_from_file(const char* filename, int *array_size)
             // 当前块block空间使用完毕 分配新block
             if ( block_count == QUOTE_BLOCKSIZE )
             {
-                snapdata_ptr = new SnapData[QUOTE_BLOCKSIZE];
+                snapdata_ptr = new SimSnapData[QUOTE_BLOCKSIZE];
                 snapdata_ptr_arr[block_num] = snapdata_ptr;
                 block_num++;
                 block_count = 0;
@@ -127,7 +127,7 @@ SnapData* read_snap_data_from_file(const char* filename, int *array_size)
     }
     fclose (pFile);
     // 为所有数据分配新空间
-    snapdata_ptr = new SnapData[total_num+1];
+    snapdata_ptr = new SimSnapData[total_num+1];
     size_t block_size;
     // 依次将每一个块的数据拷贝到新空间中去
     for (int block_id=0; block_id<block_num; block_id++)
@@ -136,23 +136,23 @@ SnapData* read_snap_data_from_file(const char* filename, int *array_size)
             block_size = QUOTE_BLOCKSIZE;
         else 
             block_size = block_count;
-        memcpy(snapdata_ptr + QUOTE_BLOCKSIZE * block_id, snapdata_ptr_arr[block_id], sizeof(SnapData) * block_size);
+        memcpy(snapdata_ptr + QUOTE_BLOCKSIZE * block_id, snapdata_ptr_arr[block_id], sizeof(SimSnapData) * block_size);
         delete[] snapdata_ptr_arr[block_id];
     }
     *array_size = total_num;
     // 末元素充值为0
-    memset(snapdata_ptr+total_num, 0, sizeof(SnapData));
+    memset(snapdata_ptr+total_num, 0, sizeof(SimSnapData));
     printf("get %ld snap data\n", total_num);
     return snapdata_ptr;
 }
 
-LevelData* read_level_data_from_file(const char* filename, int *array_size)
+SimLevelData* read_level_data_from_file(const char* filename, int *array_size)
 {
     FILE * pFile;
     char line[QUOTE_LINESIZE];
     size_t total_num = 0, block_num = 0, block_count = 0;
-    LevelData* leveldata_ptr_arr[QUOTE_BLOCKNUM];
-    memset(leveldata_ptr_arr, 0, sizeof(LevelData *) * QUOTE_BLOCKNUM);
+    SimLevelData* leveldata_ptr_arr[QUOTE_BLOCKNUM];
+    memset(leveldata_ptr_arr, 0, sizeof(SimLevelData *) * QUOTE_BLOCKNUM);
     pFile = fopen(filename , "r");
     if ( pFile == NULL ) 
     {
@@ -162,7 +162,7 @@ LevelData* read_level_data_from_file(const char* filename, int *array_size)
         return NULL;
     }
     // 首次分配空间
-    LevelData* leveldata_ptr = new LevelData[QUOTE_BLOCKSIZE];
+    SimLevelData* leveldata_ptr = new SimLevelData[QUOTE_BLOCKSIZE];
     leveldata_ptr_arr[block_num] = leveldata_ptr;
     block_num++;
     while ( ! feof (pFile) )
@@ -179,7 +179,7 @@ LevelData* read_level_data_from_file(const char* filename, int *array_size)
             // 当前块block空间使用完毕 分配新block
             if ( block_count == QUOTE_BLOCKSIZE )
             {
-                leveldata_ptr = new LevelData[QUOTE_BLOCKSIZE];
+                leveldata_ptr = new SimLevelData[QUOTE_BLOCKSIZE];
                 leveldata_ptr_arr[block_num] = leveldata_ptr;
                 block_num++;
                 block_count = 0;
@@ -188,7 +188,7 @@ LevelData* read_level_data_from_file(const char* filename, int *array_size)
     }
     fclose (pFile);
     // 为所有数据分配新空间
-    leveldata_ptr = new LevelData[total_num+1];
+    leveldata_ptr = new SimLevelData[total_num+1];
     size_t block_size;
     // 依次将每一个块的数据拷贝到新空间中去
     for (int block_id=0; block_id<block_num; block_id++)
@@ -197,25 +197,25 @@ LevelData* read_level_data_from_file(const char* filename, int *array_size)
             block_size = QUOTE_BLOCKSIZE;
         else 
             block_size = block_count;
-        memcpy(leveldata_ptr + QUOTE_BLOCKSIZE * block_id, leveldata_ptr_arr[block_id], sizeof(LevelData) * block_size);
+        memcpy(leveldata_ptr + QUOTE_BLOCKSIZE * block_id, leveldata_ptr_arr[block_id], sizeof(SimLevelData) * block_size);
         delete[] leveldata_ptr_arr[block_id];
     }
     *array_size = total_num;
     // 末元素充值为0
-    memset(leveldata_ptr+total_num, 0, sizeof(LevelData));
+    memset(leveldata_ptr+total_num, 0, sizeof(SimLevelData));
     printf("get %ld level data\n", total_num);
     return leveldata_ptr;
 }
 
 
 // 从文件里读取逐笔委托
-TickOrder* read_tick_order_from_file(const char* filename, int *array_size)
+SimTickOrder* read_tick_order_from_file(const char* filename, int *array_size)
 {
     FILE * pFile;
     char line[QUOTE_LINESIZE];
     size_t total_num = 0, block_num = 0, block_count = 0;
-    TickOrder* tickorder_ptr_arr[QUOTE_BLOCKNUM];
-    memset(tickorder_ptr_arr, 0, sizeof(TickOrder *) * QUOTE_BLOCKNUM);
+    SimTickOrder* tickorder_ptr_arr[QUOTE_BLOCKNUM];
+    memset(tickorder_ptr_arr, 0, sizeof(SimTickOrder *) * QUOTE_BLOCKNUM);
     pFile = fopen(filename , "r");
     if ( pFile == NULL ) 
     {
@@ -225,7 +225,7 @@ TickOrder* read_tick_order_from_file(const char* filename, int *array_size)
         return NULL;
     }
     // 首次分配空间
-    TickOrder* tickorder_ptr = new TickOrder[QUOTE_BLOCKSIZE];
+    SimTickOrder* tickorder_ptr = new SimTickOrder[QUOTE_BLOCKSIZE];
     tickorder_ptr_arr[block_num] = tickorder_ptr;
     block_num++;
     while ( ! feof (pFile) )
@@ -242,7 +242,7 @@ TickOrder* read_tick_order_from_file(const char* filename, int *array_size)
             // 当前块block空间使用完毕 分配新block
             if ( block_count == QUOTE_BLOCKSIZE )
             {
-                tickorder_ptr = new TickOrder[QUOTE_BLOCKSIZE];
+                tickorder_ptr = new SimTickOrder[QUOTE_BLOCKSIZE];
                 tickorder_ptr_arr[block_num] = tickorder_ptr;
                 block_num++;
                 block_count = 0;
@@ -251,7 +251,7 @@ TickOrder* read_tick_order_from_file(const char* filename, int *array_size)
     }
     fclose (pFile);
     // 为所有数据分配新空间
-    tickorder_ptr = new TickOrder[total_num+1];
+    tickorder_ptr = new SimTickOrder[total_num+1];
     size_t block_size;
     // 依次将每一个块的数据拷贝到新空间中去
     for (int block_id=0; block_id<block_num; block_id++)
@@ -260,24 +260,24 @@ TickOrder* read_tick_order_from_file(const char* filename, int *array_size)
             block_size = QUOTE_BLOCKSIZE;
         else 
             block_size = block_count;
-        memcpy(tickorder_ptr + QUOTE_BLOCKSIZE * block_id, tickorder_ptr_arr[block_id], sizeof(TickOrder) * block_size);
+        memcpy(tickorder_ptr + QUOTE_BLOCKSIZE * block_id, tickorder_ptr_arr[block_id], sizeof(SimTickOrder) * block_size);
         delete[] tickorder_ptr_arr[block_id];
     }
     *array_size = total_num;
     // 末元素充值为0
-    memset(tickorder_ptr+total_num, 0, sizeof(TickOrder));
+    memset(tickorder_ptr+total_num, 0, sizeof(SimTickOrder));
     printf("get %ld tickorder data\n", total_num);
     return tickorder_ptr;
 }
 
 // 从文件里读取逐笔成交
-TickTrade* read_tick_trade_from_file(const char* filename, int *array_size)
+SimTickTrade* read_tick_trade_from_file(const char* filename, int *array_size)
 {
     FILE * pFile;
     char line[QUOTE_LINESIZE];
     size_t total_num = 0, block_num = 0, block_count = 0;
-    TickTrade* ticktrade_ptr_arr[QUOTE_BLOCKNUM];
-    memset(ticktrade_ptr_arr, 0, sizeof(TickTrade *) * QUOTE_BLOCKNUM);
+    SimTickTrade* ticktrade_ptr_arr[QUOTE_BLOCKNUM];
+    memset(ticktrade_ptr_arr, 0, sizeof(SimTickTrade *) * QUOTE_BLOCKNUM);
     pFile = fopen(filename , "r");
     if ( pFile == NULL ) 
     {
@@ -287,7 +287,7 @@ TickTrade* read_tick_trade_from_file(const char* filename, int *array_size)
         return NULL;
     }
     // 首次分配空间
-    TickTrade* ticktrade_ptr = new TickTrade[QUOTE_BLOCKSIZE];
+    SimTickTrade* ticktrade_ptr = new SimTickTrade[QUOTE_BLOCKSIZE];
     ticktrade_ptr_arr[block_num] = ticktrade_ptr;
     block_num++;
     while ( ! feof (pFile) )
@@ -304,7 +304,7 @@ TickTrade* read_tick_trade_from_file(const char* filename, int *array_size)
             // 当前块block空间使用完毕 分配新block
             if ( block_count == QUOTE_BLOCKSIZE )
             {
-                ticktrade_ptr = new TickTrade[QUOTE_BLOCKSIZE];
+                ticktrade_ptr = new SimTickTrade[QUOTE_BLOCKSIZE];
                 ticktrade_ptr_arr[block_num] = ticktrade_ptr;
                 block_num++;
                 block_count = 0;
@@ -313,7 +313,7 @@ TickTrade* read_tick_trade_from_file(const char* filename, int *array_size)
     }
     fclose (pFile);
     // 为所有数据分配新空间
-    ticktrade_ptr = new TickTrade[total_num+1];
+    ticktrade_ptr = new SimTickTrade[total_num+1];
     size_t block_size;
     // 依次将每一个块的数据拷贝到新空间中去
     for (int block_id=0; block_id<block_num; block_id++)
@@ -322,17 +322,17 @@ TickTrade* read_tick_trade_from_file(const char* filename, int *array_size)
             block_size = QUOTE_BLOCKSIZE;
         else 
             block_size = block_count;
-        memcpy(ticktrade_ptr + QUOTE_BLOCKSIZE * block_id, ticktrade_ptr_arr[block_id], sizeof(TickTrade) * block_size);
+        memcpy(ticktrade_ptr + QUOTE_BLOCKSIZE * block_id, ticktrade_ptr_arr[block_id], sizeof(SimTickTrade) * block_size);
         delete[] ticktrade_ptr_arr[block_id];
     }
     *array_size = total_num;
     // 末元素充值为0
-    memset(ticktrade_ptr+total_num, 0, sizeof(TickTrade));
+    memset(ticktrade_ptr+total_num, 0, sizeof(SimTickTrade));
     printf("get %ld ticktrade data\n", total_num);
     return ticktrade_ptr;
 }
 
-bool read_stock_info_from_line(char* line, StockInfo* stockinfo_ptr, const int date)
+bool read_stock_info_from_line(char* line, SimStockInfo* stockinfo_ptr, const int date)
 {
     if (line == NULL || stockinfo_ptr == NULL || strlen(line) < 20)
         return false;
@@ -341,8 +341,8 @@ bool read_stock_info_from_line(char* line, StockInfo* stockinfo_ptr, const int d
     market = line[8];
     switch(market)
     {
-        case 'H': stockinfo_ptr->exchange_id = LOCAL_EXCHANGE_SH; break;
-        case 'Z': stockinfo_ptr->exchange_id = LOCAL_EXCHANGE_SZ; break;
+        case 'H': stockinfo_ptr->exchange_id = SIM_EXCHANGE_SH; break;
+        case 'Z': stockinfo_ptr->exchange_id = SIM_EXCHANGE_SZ; break;
         default : return false;
     }
     strncpy(stockinfo_ptr->code, line, 6);
@@ -370,7 +370,7 @@ bool read_stock_info_from_line(char* line, StockInfo* stockinfo_ptr, const int d
 }
 
 // 读取深度行情
-bool read_snap_data_from_line(char* line, SnapData* ptr)
+bool read_snap_data_from_line(char* line, SimSnapData* ptr)
 {
     if (line == NULL || ptr == NULL || strlen(line) < 100)
         return false;
@@ -404,8 +404,8 @@ bool read_snap_data_from_line(char* line, SnapData* ptr)
     switch(code[0])
     {
         case '0': 
-        case '3': ptr->exchange_id = LOCAL_EXCHANGE_SZ; break;
-        case '6': ptr->exchange_id = LOCAL_EXCHANGE_SH; break;
+        case '3': ptr->exchange_id = SIM_EXCHANGE_SZ; break;
+        case '6': ptr->exchange_id = SIM_EXCHANGE_SH; break;
         default : return false;
     }
     strncpy(ptr->code, code, 6);
@@ -413,7 +413,7 @@ bool read_snap_data_from_line(char* line, SnapData* ptr)
     return true;
 }
 
-bool read_level_data_from_line(char* line, LevelData* ptr)
+bool read_level_data_from_line(char* line, SimLevelData* ptr)
 {
      if (line == NULL || ptr == NULL || strlen(line) < 100)
         return false;
@@ -437,8 +437,8 @@ bool read_level_data_from_line(char* line, LevelData* ptr)
     switch(code[0])
     {
         case '0': 
-        case '3': ptr->exchange_id = LOCAL_EXCHANGE_SZ; break;
-        case '6': ptr->exchange_id = LOCAL_EXCHANGE_SH; break;
+        case '3': ptr->exchange_id = SIM_EXCHANGE_SZ; break;
+        case '6': ptr->exchange_id = SIM_EXCHANGE_SH; break;
         default : return false;
     }
     strncpy(ptr->code, code, 6);
@@ -468,7 +468,7 @@ bool read_level_data_from_line(char* line, LevelData* ptr)
     return true;
 }
 
-bool read_tick_order_from_line(char* line, TickOrder* ptr)
+bool read_tick_order_from_line(char* line, SimTickOrder* ptr)
 {
     if (line == NULL || ptr == NULL || strlen(line) < 100)
         return false;
@@ -490,8 +490,8 @@ bool read_tick_order_from_line(char* line, TickOrder* ptr)
     switch(code[0])
     {
         case '0': 
-        case '3': ptr->exchange_id = LOCAL_EXCHANGE_SZ; break;
-        case '6': ptr->exchange_id = LOCAL_EXCHANGE_SH; break;
+        case '3': ptr->exchange_id = SIM_EXCHANGE_SZ; break;
+        case '6': ptr->exchange_id = SIM_EXCHANGE_SH; break;
         default : return false;
     }
     strncpy(ptr->code, code, 6);
@@ -499,7 +499,7 @@ bool read_tick_order_from_line(char* line, TickOrder* ptr)
     return true;
 }
 
-bool read_tick_trade_from_line(char* line, TickTrade* ptr)
+bool read_tick_trade_from_line(char* line, SimTickTrade* ptr)
 {
     if (line == NULL || ptr == NULL || strlen(line) < 100)
         return false;
@@ -523,8 +523,8 @@ bool read_tick_trade_from_line(char* line, TickTrade* ptr)
     switch(code[0])
     {
         case '0': 
-        case '3': ptr->exchange_id = LOCAL_EXCHANGE_SZ; break;
-        case '6': ptr->exchange_id = LOCAL_EXCHANGE_SH; break;
+        case '3': ptr->exchange_id = SIM_EXCHANGE_SZ; break;
+        case '6': ptr->exchange_id = SIM_EXCHANGE_SH; break;
         default : return false;
     }
     strncpy(ptr->code, code, 6);

@@ -1,19 +1,23 @@
 //定义本地行情类相关数据结构
-#define LOCAL_EXCHANGE_SH 1
-#define LOCAL_EXCHANGE_SZ 2
-#define LOCAL_CODESIZE 8
-#define LOCAL_NAMESIZE 16
-#define LOCAL_TRADETYPE_DEAL 'F'
-#define LOCAL_TRADETYPE_CANCEL '4'
+#define SIM_EXCHANGE_SH 1
+#define SIM_EXCHANGE_SZ 2
+#define SIM_CODESIZE 8
+#define SIM_NAMESIZE 16
+#define SIM_TRADETYPE_DEAL 'F'
+#define SIM_TRADETYPE_CANCEL '4'
+#define SIM_ORDERTYPE_MARKET '1'
+#define SIM_ORDERTYPE_LIMIT '2'
+#define SIM_ORDERSIDE_BUY '1'
+#define SIM_ORDERSIDE_SELL '2'
 #include <stdint.h>
 ///快照行情
-struct SnapData
+struct SimSnapData
 {
     // 代码
     ///交易所代码
     int exchange_id;
     ///合约代码（不包含交易所信息），不带空格，以'\0'结尾
-    char	code[LOCAL_CODESIZE];
+    char	code[SIM_CODESIZE];
 
     // 价格
 	///最新价
@@ -48,13 +52,13 @@ struct SnapData
 };
 
 ///10档行情
-struct LevelData
+struct SimLevelData
 {
     // 代码
     ///交易所代码
     int exchange_id;
     ///合约代码（不包含交易所信息），不带空格，以'\0'结尾
-    char	code[LOCAL_CODESIZE];
+    char	code[SIM_CODESIZE];
     /// 时间类，格式为YYYYMMDDHHMMSSsss
     int64_t data_time;
 
@@ -85,11 +89,11 @@ struct LevelData
 };
 
 ///股票行情静态信息
-struct StockInfo {
+struct SimStockInfo {
     ///交易所代码
     int exchange_id;
     ///合约代码（不包含交易所信息），不带空格，以'\0'结尾
-    char    code[LOCAL_CODESIZE];
+    char    code[SIM_CODESIZE];
     /// 合约名称
     char    name[16];
     ///昨收盘
@@ -104,11 +108,11 @@ struct StockInfo {
 
 
 ///逐笔委托(仅适用深交所)
-struct TickOrder {
+struct SimTickOrder {
     ///交易所代码
     int exchange_id;
     ///合约代码（不包含交易所信息），不带空格，以'\0'结尾
-    char code[LOCAL_CODESIZE];
+    char code[SIM_CODESIZE];
     ///委托时间 
     int64_t data_time;
     ///委托序号(在同一个channel_no内唯一，从1开始连续)
@@ -124,11 +128,11 @@ struct TickOrder {
 };
 
 ///逐笔成交
-struct TickTrade {
+struct SimTickTrade {
     ///交易所代码
     int exchange_id;
     ///合约代码（不包含交易所信息），不带空格，以'\0'结尾
-    char code[LOCAL_CODESIZE];
+    char code[SIM_CODESIZE];
     ///成交时间
     int64_t data_time;
     ///委托序号(在同一个channel_no内唯一，从1开始连续)

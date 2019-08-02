@@ -66,7 +66,7 @@ private:
 
     void start_push_trade_thread();
 
-    void start_push_trade_thread();
+    void close_push_trade_thread();
 
     bool trade_pthread_status;
 
