@@ -23,9 +23,7 @@ void convert_stockinfo(const SimStockInfo* stockinfo_ptr, StockStaticInfo * stoc
 	// 最小变动价位
 	stockstaticinfo_ptr->price_tick = 0.01;
 
-    stockinfo_ptr += 1;
-
-    if (stockinfo_ptr->pre_close_price > 0)
+    if (stockinfo_ptr->next != NULL)
         *is_last = false;
     else
         *is_last = true;

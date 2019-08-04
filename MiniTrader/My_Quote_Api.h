@@ -1,8 +1,6 @@
 #include "Quote_Api.h"
 #include "Quote_Spi.h"
-#include "Quote_generator.h"
 
-class Quote_Generator;
 // 行情推送线程参数结构体
 struct Quote_Push_Param_Struct
 {

@@ -21,8 +21,8 @@ void split_line_to_word_array(char* line, const char* separator, char** word_arr
         word_array[i] = NULL;
 }
 
-SimStockInfo* read_stock_info_from_file(const char* filename, const int date, int *array_size)
-{
+SimDataManager* read_stock_info_from_file(const char* filename, const int date)
+{   
     FILE * pFile;
     char line[QUOTE_LINESIZE];
     size_t total_num = 0, block_num = 0, block_count = 0;
@@ -64,7 +64,7 @@ SimStockInfo* read_stock_info_from_file(const char* filename, const int date, in
     }
     fclose (pFile);
     // 为所有数据分配新空间
-    stockinfo_ptr = new SimStockInfo[total_num+1];
+    stockinfo_ptr = new SimStockInfo[total_num];
     size_t block_size;
     // 依次将每一个块的数据拷贝到新空间中去
     for (int block_id=0; block_id<block_num; block_id++)
@@ -76,15 +76,17 @@ SimStockInfo* read_stock_info_from_file(const char* filename, const int date, in
         memcpy(stockinfo_ptr + QUOTE_BLOCKSIZE * block_id, stockinfo_ptr_arr[block_id], sizeof(SimStockInfo) * block_size);
         delete[] stockinfo_ptr_arr[block_id];
     }
-    *array_size = total_num;
-    // 末元素充值为0
-    memset(stockinfo_ptr+total_num, 0, sizeof(SimStockInfo));
+    SimDataManager *data_manager = new SimDataManager;
+    memset(data_manager, 0, sizeof(SimDataManager));
+    data_manager->begin = stockinfo_ptr;
+    data_manager->end = stockinfo_ptr + total_num;
+    data_manager->current = data_manager->begin;
     printf("date:%d stock_num:%lu\n", date, total_num);
-    return stockinfo_ptr;
+    return data_manager;
 }
 
 // 从文件里读取深度行情
-SimSnapData* read_snap_data_from_file(const char* filename, int *array_size)
+SimDataManager* read_snap_data_from_file(const char* filename)
 {
     FILE * pFile;
     char line[QUOTE_LINESIZE];
@@ -127,7 +129,7 @@ SimSnapData* read_snap_data_from_file(const char* filename, int *array_size)
     }
     fclose (pFile);
     // 为所有数据分配新空间
-    snapdata_ptr = new SimSnapData[total_num+1];
+    snapdata_ptr = new SimSnapData[total_num];
     size_t block_size;
     // 依次将每一个块的数据拷贝到新空间中去
     for (int block_id=0; block_id<block_num; block_id++)
@@ -139,14 +141,16 @@ SimSnapData* read_snap_data_from_file(const char* filename, int *array_size)
         memcpy(snapdata_ptr + QUOTE_BLOCKSIZE * block_id, snapdata_ptr_arr[block_id], sizeof(SimSnapData) * block_size);
         delete[] snapdata_ptr_arr[block_id];
     }
-    *array_size = total_num;
-    // 末元素充值为0
-    memset(snapdata_ptr+total_num, 0, sizeof(SimSnapData));
+    SimDataManager *data_manager = new SimDataManager;
+    memset(data_manager, 0, sizeof(SimDataManager));
+    data_manager->begin = snapdata_ptr;
+    data_manager->end = snapdata_ptr + total_num;
+    data_manager->current = data_manager->begin;
     printf("get %ld snap data\n", total_num);
-    return snapdata_ptr;
+    return data_manager;
 }
 
-SimLevelData* read_level_data_from_file(const char* filename, int *array_size)
+SimDataManager* read_level_data_from_file(const char* filename)
 {
     FILE * pFile;
     char line[QUOTE_LINESIZE];
@@ -188,7 +192,7 @@ SimLevelData* read_level_data_from_file(const char* filename, int *array_size)
     }
     fclose (pFile);
     // 为所有数据分配新空间
-    leveldata_ptr = new SimLevelData[total_num+1];
+    leveldata_ptr = new SimLevelData[total_num];
     size_t block_size;
     // 依次将每一个块的数据拷贝到新空间中去
     for (int block_id=0; block_id<block_num; block_id++)
@@ -200,16 +204,18 @@ SimLevelData* read_level_data_from_file(const char* filename, int *array_size)
         memcpy(leveldata_ptr + QUOTE_BLOCKSIZE * block_id, leveldata_ptr_arr[block_id], sizeof(SimLevelData) * block_size);
         delete[] leveldata_ptr_arr[block_id];
     }
-    *array_size = total_num;
-    // 末元素充值为0
-    memset(leveldata_ptr+total_num, 0, sizeof(SimLevelData));
+    SimDataManager *data_manager = new SimDataManager;
+    memset(data_manager, 0, sizeof(SimDataManager));
+    data_manager->begin = leveldata_ptr;
+    data_manager->end = leveldata_ptr + total_num;
+    data_manager->current = data_manager->begin;
     printf("get %ld level data\n", total_num);
-    return leveldata_ptr;
+    return data_manager;
 }
 
 
 // 从文件里读取逐笔委托
-SimTickOrder* read_tick_order_from_file(const char* filename, int *array_size)
+SimDataManager* read_tick_order_from_file(const char* filename)
 {
     FILE * pFile;
     char line[QUOTE_LINESIZE];
@@ -263,15 +269,17 @@ SimTickOrder* read_tick_order_from_file(const char* filename, int *array_size)
         memcpy(tickorder_ptr + QUOTE_BLOCKSIZE * block_id, tickorder_ptr_arr[block_id], sizeof(SimTickOrder) * block_size);
         delete[] tickorder_ptr_arr[block_id];
     }
-    *array_size = total_num;
-    // 末元素充值为0
-    memset(tickorder_ptr+total_num, 0, sizeof(SimTickOrder));
+    SimDataManager *data_manager = new SimDataManager;
+    memset(data_manager, 0, sizeof(SimDataManager));
+    data_manager->begin = tickorder_ptr;
+    data_manager->end = tickorder_ptr + total_num;
+    data_manager->current = data_manager->begin;
     printf("get %ld tickorder data\n", total_num);
-    return tickorder_ptr;
+    return data_manager;
 }
 
 // 从文件里读取逐笔成交
-SimTickTrade* read_tick_trade_from_file(const char* filename, int *array_size)
+SimDataManager* read_tick_trade_from_file(const char* filename)
 {
     FILE * pFile;
     char line[QUOTE_LINESIZE];
@@ -313,7 +321,7 @@ SimTickTrade* read_tick_trade_from_file(const char* filename, int *array_size)
     }
     fclose (pFile);
     // 为所有数据分配新空间
-    ticktrade_ptr = new SimTickTrade[total_num+1];
+    ticktrade_ptr = new SimTickTrade[total_num];
     size_t block_size;
     // 依次将每一个块的数据拷贝到新空间中去
     for (int block_id=0; block_id<block_num; block_id++)
@@ -325,11 +333,13 @@ SimTickTrade* read_tick_trade_from_file(const char* filename, int *array_size)
         memcpy(ticktrade_ptr + QUOTE_BLOCKSIZE * block_id, ticktrade_ptr_arr[block_id], sizeof(SimTickTrade) * block_size);
         delete[] ticktrade_ptr_arr[block_id];
     }
-    *array_size = total_num;
-    // 末元素充值为0
-    memset(ticktrade_ptr+total_num, 0, sizeof(SimTickTrade));
+    SimDataManager *data_manager = new SimDataManager;
+    memset(data_manager, 0, sizeof(SimDataManager));
+    data_manager->begin = ticktrade_ptr;
+    data_manager->end = ticktrade_ptr + total_num;
+    data_manager->current = data_manager->begin;
     printf("get %ld ticktrade data\n", total_num);
-    return ticktrade_ptr;
+    return data_manager;
 }
 
 bool read_stock_info_from_line(char* line, SimStockInfo* stockinfo_ptr, const int date)

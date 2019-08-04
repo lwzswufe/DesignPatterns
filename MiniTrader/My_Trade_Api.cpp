@@ -2,7 +2,7 @@
 #include <pthread.h>
 #include <memory>
 #include "My_Trade_Api.h"
-#include "Trade_generator.h"
+#include "simulate_trade.h"
 #include "sim_trade_convert.h"
 
 TradeApi * TradeApi::CreateTradeApi(uint8_t client_id)
@@ -27,9 +27,11 @@ int MyTradeApi::Logout()
 
 uint64_t MyTradeApi::InsertOrder(OrderInsertInfo *order)
 {   
-    LocalOrder * simorder = new LocalOrder;
-    simorder = convert_order_struct(order);
-    return Sim::insert_order(simorder);
+    SimOrder * simorder = new SimOrder;
+    convert_order_struct(order, simorder);
+    uint64_t order_id = Sim::insert_order(simorder);
+    order->order__id = order_id;
+    return order_id;
 }
 
 uint64_t MyTradeApi::CancelOrder(const uint64_t order__id)
@@ -92,8 +94,8 @@ void *task_push_trade(void* arg)
     TradeReport tradereport, *trade_info = &tradereport;
     OrderInfo orderinfo, *order_info = &orderinfo;
     // 本地数据指针
-    SimTickTrade* latest_ticktrade, *new_ticktrade;
-    SimOrder* simorder;
+    const SimTradeReport* sim_tradereport;
+    const SimOrder* simorder;
     vector<SimOrder*> traded_order_vec;
     // 线程id
     pthread_t pid = pthread_self();
@@ -104,18 +106,14 @@ void *task_push_trade(void* arg)
     printf("%s start\n", __func__);
     while(Sim::quote_start)
     {   // 遍历股票
-
-            traded_order_vec = Sim::get_traded_order();
-                new_ticktrade = Sim::simulate_trade(latest_ticktrade, simorder);
-            // 若成交
-            if (new_ticktrade != NULL);
-            {   // 推送成交事件
-                trade_info = convert_trade_struct(simorder, new_ticktrade);
-                spi->OnTradeEvent(trade_info);
-                // 推送订单状态更新
-                order_info = convert_order_struct(simorder);
-                spi->OnOrderEvent(order_info);
-            }
+        while (Sim::tradereport_num < Sim::tradereport_vec.size())
+        {
+            sim_tradereport = Sim::tradereport_vec[Sim::tradereport_num];
+            Sim::tradereport_num++;
+            convert_trade_struct(sim_tradereport, trade_info);
+            spi->OnTradeEvent(trade_info);
+            convert_order_struct(sim_tradereport->order, order_info);
+            spi->OnOrderEvent(order_info);
         }
         sleep(1);
     }

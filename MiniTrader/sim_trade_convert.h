@@ -8,11 +8,14 @@
 // 回测数据结构
 #include "Trade_Api_Struct.h"
 
-// 将报单结构体转化为交易系统报单结构体
-SimOrder* convert_order_struct(const OrderInsertInfo* orderinsert);
+// 将报单结构体转化为模拟交易系统报单结构体
+void convert_order_struct(const OrderInsertInfo* orderinsert, SimOrder* simorder);
 
 // 将模拟成交系统报单结构体转化为订单信息结构体  
-OrderInfo* convert_order_struct(const SimOrder* order);
+void convert_order_struct(const SimOrder* order, OrderInfo*);
 
 // 将成交信息转化为成交通知
-TradeReport* convert_trade_struct(const SimOrder* order, const SimTickTrade* ticktrade);
+// void convert_trade_struct(const SimOrder* order, const SimTickTrade* ticktrade, TradeReport* tradereport);
+
+// 将成交信息转化为成交通知
+void convert_trade_struct(const SimTradeReport* simtradereport, TradeReport* tradereport);

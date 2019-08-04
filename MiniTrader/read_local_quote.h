@@ -12,31 +12,31 @@
 // const int date 指定日期
 // 返回首个股票信息的指针
 // 失败返回NULL
-SimStockInfo* read_stock_info_from_file(const char* filename, const int date, int *array_size);
+SimDataManager* read_stock_info_from_file(const char* filename, const int date);
 
 // 从文件里读取行情快照  高开低收等行情数据
 // const char* filename 文件名 
 // 返回首个snap行情信息的指针
 // 失败返回NULL
-SimSnapData* read_snap_data_from_file(const char* filename, int *array_size);
+SimDataManager* read_snap_data_from_file(const char* filename);
 
 // 从文件里读取10档行情 
 // const char* filename 文件名
 // 返回首个level行情信息的指针
 // 失败返回NULL
-SimLevelData* read_level_data_from_file(const char* filename, int *array_size);
+SimDataManager* read_level_data_from_file(const char* filename);
 
 // 从文件里读取逐笔委托
 // const char* filename 文件名
 // 返回首个委托行情信息的指针
 // 失败返回NULL
-SimTickOrder* read_tick_order_from_file(const char* filename, int *array_size);
+SimDataManager* read_tick_order_from_file(const char* filename);
 
 // 从文件里读取逐笔成交
 // const char* filename 文件名
 // 返回首个成交行情信息的指针
 // 失败返回NULL
-SimTickTrade* read_tick_trade_from_file(const char* filename, int *array_size);
+SimDataManager* read_tick_trade_from_file(const char* filename);
 
 // 读取股票静态信息
 // char* line  需要读取的字符串

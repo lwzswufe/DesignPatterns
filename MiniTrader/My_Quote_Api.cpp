@@ -2,8 +2,8 @@
 #include <pthread.h>
 #include <memory>
 #include "My_Quote_Api.h"
-#include "local_quote_convert.h"
-#include "generator_global.h"
+#include "sim_quote_convert.h"
+#include "simulate_trade.h"
 
 QuoteApi * QuoteApi::CreateQuoteApi(const char *ini_file)
 {   
@@ -90,7 +90,7 @@ void *task_push_quote(void* arg)
     printf("ini_file:%s\n", param->ini_file);
     Sim::initial_generator_data();
     Sim::quote_start = true;
-    printf("SIM::quote_start\n")
+    printf("SIM::quote_start\n");
     // wait for start trade
     // while (!Sim::trade_start)
     // {
@@ -98,7 +98,6 @@ void *task_push_quote(void* arg)
     // }
     double * clock_ptr = &(param->clock);
     QuoteSpi* spi = param->spi;
-    Quote_Generator generator(param->ini_file);
     // xtp数据指针
     bool is_last, is_am = true;
     ErrorInfo errorinfo;
@@ -106,84 +105,66 @@ void *task_push_quote(void* arg)
     TickByTickStruct tickbytick, *tick_ptr = &tickbytick;
     DepthData depthdata, *depthdata_ptr = &depthdata;
     // 本地数据指针
-    const StockInfo* info_ptr;
-    const TickOrder* tickorder_ptr;
-    const TickTrade* ticktrade_ptr;
-    const SnapData* snap_ptr;
-    const LevelData* level_ptr;
+    const SimStockInfo* info_ptr;
+    const SimTickOrder* tickorder_ptr;
+    const SimTickTrade* ticktrade_ptr;
+    const SimSnapData*  snap_ptr;
+    const SimLevelData* level_ptr;
     // 线程id
     pthread_t pid = pthread_self();
     printf("%s start\n", __func__);
     // 推送股票信息
-    generator.load_data(is_am);
-    info_ptr = generator.Get_StockInfo();
-    while (info_ptr != NULL)
+    Sim::load_data(is_am);
+    info_ptr = Sim::Get_StockInfo();
+    while (info_ptr->next != NULL)
     {   
+        info_ptr = info_ptr->next;
         convert_stockinfo(info_ptr, stockinfo_ptr, &is_last);
         spi->OnQueryAllTickers(stockinfo_ptr, &errorinfo, is_last);
-        info_ptr = generator.Get_StockInfo();
     }
     // 开始推送行情
-    *clock_ptr = generator.Get_Clock();
+    *clock_ptr = Sim::Get_Clock();
     printf("quote_push_thread start time:%.3lf\n", *clock_ptr);
     while(*clock_ptr < 150000.00 && param->push_status)
     {   // 判断是否需要载入下午的数据
-        if (generator.check_is_need_load_data())
+        if (Sim::check_is_need_load_data())
         {   
             if (is_am)
             {
                 is_am = false;
-                generator.load_data(is_am);
+                Sim::load_data(is_am);
             }
         }
-        // 推送用户行情数据
-        while(Sim::tickorder_read_num < Sim::tickorder_vec.size())
-        {
-            tickorder_ptr = Sim::tickorder_vec[Sim::tickorder_read_num]
-            Sim::tickorder_read_num++;
-            convert_tickorder(tickorder_ptr, tick_ptr);
-            spi->OnTickByTick(tick_ptr);
-        }
-        // 推送行情数据
-        tickorder_ptr = generator.Get_TickOrder();
-        while(tickorder_ptr != NULL)
+        ticktrade_ptr = Sim::Get_TickTrade();
+        tickorder_ptr = Sim::Get_TickOrder();
+        // 推送委托流
+        while(tickorder_ptr->next != NULL)
         {   
+            tickorder_ptr = tickorder_ptr->next;
             convert_tickorder(tickorder_ptr, tick_ptr);
             spi->OnTickByTick(tick_ptr);
-            tickorder_ptr = generator.Get_TickOrder();
         } 
-        // 推送用户成交数据
-        while(Sim::ticktrade_read_num < Sim::ticktrade_vec.size())
-        {
-            ticktrade_ptr = Sim::ticktrade_vec[Sim::ticktrade_read_num]
-            Sim::ticktrade_read_num++;
-            convert_tickorder(ticktrade_ptr, tick_ptr);
-            spi->OnTickByTick(tick_ptr);
-        }
         // 推送成交流
-        ticktrade_ptr = generator.Get_TickTrade();
-        while(ticktrade_ptr != NULL)
+        while(ticktrade_ptr->next != NULL)
         {   
-            Sim::set_lastest_ticktrade(ticktrade_ptr);
+            ticktrade_ptr = ticktrade_ptr->next;
             convert_ticktrade(ticktrade_ptr, tick_ptr);
             spi->OnTickByTick(tick_ptr);
-            ticktrade_ptr = generator.Get_TickTrade();
         }
         // 推送深度行情数据
-        snap_ptr = generator.Get_SnapData();
-        level_ptr = generator.Get_LevelData();
-        while(snap_ptr != NULL && level_ptr != NULL)
-        {
+        snap_ptr = Sim::Get_SnapData();
+        level_ptr = Sim::Get_LevelData();
+        while(snap_ptr->next != NULL && level_ptr->next != NULL)
+        {   
+            snap_ptr = snap_ptr->next;
+            level_ptr = level_ptr->next;
             convert_depthdata(snap_ptr, level_ptr, depthdata_ptr);
             spi->OnDepthMarketData(depthdata_ptr);
-            snap_ptr = generator.Get_SnapData();
-            level_ptr = generator.Get_LevelData();
         }
         // 设置时间
-        *clock_ptr = generator.Get_Clock();
-        ApiTimenum = generator.Get_Timenum();
-        // SetCurrentTime(generator.Get_Time());
-        generator.update_time();
+        *clock_ptr = Sim::Get_Clock();
+        ApiTimenum = Sim::Get_Timenum();
+        Sim::update_time();
     }
     printf("%s end\n", __func__);
     pthread_exit(0);

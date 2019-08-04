@@ -2,20 +2,21 @@
 #include "read_local_quote.h"
 
 /*
-g++ local_quote_struct.h read_local_quote.h read_local_quote.cpp read_local_quote_test.cpp -o read_local_quote_test.exe
+g++ sim_quote_struct.h read_local_quote.h read_local_quote.cpp read_local_quote_test.cpp -o read_local_quote_test.exe
 */
 
 // 测试读取股票信息
 void test_stock_info(const char * filename)
 {
-    int date = 20190110, stock_num = 0, total_num;
-    SimStockInfo* ptr = read_stock_info_from_file(filename, date, &total_num);
-    while (ptr->pre_close_price > 0)
-    {
+    int date = 20190110, stock_num = 0;
+    SimDataManager* data_manager = read_stock_info_from_file(filename, date);
+    SimStockInfo* ptr = (SimStockInfo*)data_manager->begin;
+    while (ptr != data_manager->end)
+    {   
+        
         printf("code:%s Market:%d preclose:%.2lf\tuplimit:%.2lf\n", 
         ptr->code, ptr->exchange_id,  ptr->pre_close_price, ptr->upper_limit_price);
         ptr++;
-        stock_num++;
     }
     printf("date:%d stock_num:%d\n", date, stock_num);
 }
@@ -23,9 +24,10 @@ void test_stock_info(const char * filename)
 // 测试读取快照数据
 void test_snap_data(const char* filename)
 {
-    int data_num = 0, snapdata_flag = 1, total_num;
-    SimSnapData* ptr = read_snap_data_from_file(filename, &total_num);
-    while (ptr->data_time > 0)
+    int data_num = 0, snapdata_flag = 1;
+    SimDataManager* data_manager = read_snap_data_from_file(filename);
+    SimSnapData* ptr = (SimSnapData*)data_manager->begin;
+    while (ptr!= data_manager->end)
     {   
         data_num++;
         if (data_num >= snapdata_flag)
@@ -42,9 +44,10 @@ void test_snap_data(const char* filename)
 // 测试读取10档行情数据
 void test_level_data(const char * filename)
 {
-    int data_num = 0, leveldata_flag = 1, total_num;
-    SimLevelData* ptr = read_level_data_from_file(filename, &total_num);
-    while (ptr->data_time > 0)
+    int data_num = 0, leveldata_flag = 1;
+    SimDataManager* data_manager = read_level_data_from_file(filename);
+    SimLevelData* ptr = (SimLevelData*)data_manager->begin;
+    while (ptr != data_manager->end)
     {   
         data_num++;
         if (data_num >= leveldata_flag)
@@ -66,9 +69,10 @@ void test_level_data(const char * filename)
 
 void test_tick_order(const char * filename)
 {
-    int data_num = 0, flag = 1, total_num;
-    SimTickOrder* ptr = read_tick_order_from_file(filename, &total_num);
-    while (ptr->data_time > 0)
+    int data_num = 0, flag = 1;
+    SimDataManager* data_manager = read_tick_order_from_file(filename);
+    SimTickOrder* ptr = (SimTickOrder*) data_manager->begin;
+    while (ptr != data_manager->end)
     {   
         data_num++;
         if (data_num >= flag)
@@ -84,9 +88,10 @@ void test_tick_order(const char * filename)
 
 void test_tick_trade(const char * filename)
 {
-    int data_num = 0, flag = 1, total_num;
-    SimTickTrade* ptr = read_tick_trade_from_file(filename, &total_num);
-    while (ptr->data_time > 0)
+    int data_num = 0, flag = 1;
+    SimDataManager* data_manager = read_tick_trade_from_file(filename);
+    SimTickTrade* ptr = (SimTickTrade*) data_manager->begin;
+    while (ptr != data_manager->end)
     {   
         data_num++;
         if (data_num >= flag)
