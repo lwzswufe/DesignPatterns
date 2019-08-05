@@ -100,7 +100,7 @@ void convert_depthdata(const SimSnapData* snap_ptr, const SimLevelData* level_pt
 
 // 转换委托流数据
 void convert_tickorder(const SimTickOrder* tickorder_ptr, TickByTickStruct * tick_ptr)
-{
+{   
     // 交易所
     switch(tickorder_ptr->exchange_id)
     {

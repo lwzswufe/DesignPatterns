@@ -110,6 +110,7 @@ void *task_push_trade(void* arg)
     vector<SimOrder*> traded_order_vec;
     // 线程id
     pthread_t pid = pthread_self();
+    printf("wait for start quote\n");
     while(!Sim::quote_start)
     {
         sleep(1);

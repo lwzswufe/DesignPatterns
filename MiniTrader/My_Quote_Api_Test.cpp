@@ -29,7 +29,7 @@ int main_program()
     api_quote->QueryAllTickers(EXCHANGE_SZ);
     now_timenum = GetTimenum();
     printf("timenum:%d\n", now_timenum);
-    while (GetTimenum() < 145700)
+    while (GetTimenum() < 113000)
     {
         if (last_timenum + 100 < now_timenum)
         {   

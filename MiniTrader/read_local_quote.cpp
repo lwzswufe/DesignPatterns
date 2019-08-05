@@ -38,6 +38,7 @@ SimDataManager* read_stock_info_from_file(const char* filename, const int date)
     }
     // 首次分配空间
     SimStockInfo* stockinfo_ptr = new SimStockInfo[QUOTE_BLOCKSIZE];
+    memset(stockinfo_ptr, 0, sizeof(SimStockInfo) * QUOTE_BLOCKSIZE);
     stockinfo_ptr_arr[block_num] = stockinfo_ptr;
     block_num++;
     while ( ! feof (pFile) )
@@ -56,6 +57,7 @@ SimDataManager* read_stock_info_from_file(const char* filename, const int date)
             if ( block_count == QUOTE_BLOCKSIZE )
             {
                 stockinfo_ptr = new SimStockInfo[QUOTE_BLOCKSIZE];
+                memset(stockinfo_ptr, 0, sizeof(SimStockInfo) * QUOTE_BLOCKSIZE);
                 stockinfo_ptr_arr[block_num] = stockinfo_ptr;
                 block_num++;
                 block_count = 0;
@@ -103,6 +105,7 @@ SimDataManager* read_snap_data_from_file(const char* filename)
     }
     // 首次分配空间
     SimSnapData* snapdata_ptr = new SimSnapData[QUOTE_BLOCKSIZE];
+    memset(snapdata_ptr, 0, sizeof(SimSnapData) * QUOTE_BLOCKSIZE);
     snapdata_ptr_arr[block_num] = snapdata_ptr;
     block_num++;
     while ( ! feof (pFile) )
@@ -121,6 +124,7 @@ SimDataManager* read_snap_data_from_file(const char* filename)
             if ( block_count == QUOTE_BLOCKSIZE )
             {
                 snapdata_ptr = new SimSnapData[QUOTE_BLOCKSIZE];
+                memset(snapdata_ptr, 0, sizeof(SimSnapData) * QUOTE_BLOCKSIZE);
                 snapdata_ptr_arr[block_num] = snapdata_ptr;
                 block_num++;
                 block_count = 0;
@@ -167,6 +171,7 @@ SimDataManager* read_level_data_from_file(const char* filename)
     }
     // 首次分配空间
     SimLevelData* leveldata_ptr = new SimLevelData[QUOTE_BLOCKSIZE];
+    memset(leveldata_ptr, 0, sizeof(SimLevelData) * QUOTE_BLOCKSIZE);
     leveldata_ptr_arr[block_num] = leveldata_ptr;
     block_num++;
     while ( ! feof (pFile) )
@@ -184,6 +189,7 @@ SimDataManager* read_level_data_from_file(const char* filename)
             if ( block_count == QUOTE_BLOCKSIZE )
             {
                 leveldata_ptr = new SimLevelData[QUOTE_BLOCKSIZE];
+                memset(leveldata_ptr, 0, sizeof(SimLevelData) * QUOTE_BLOCKSIZE);
                 leveldata_ptr_arr[block_num] = leveldata_ptr;
                 block_num++;
                 block_count = 0;
@@ -232,6 +238,7 @@ SimDataManager* read_tick_order_from_file(const char* filename)
     }
     // 首次分配空间
     SimTickOrder* tickorder_ptr = new SimTickOrder[QUOTE_BLOCKSIZE];
+    memset(tickorder_ptr, 0, sizeof(SimTickOrder) * QUOTE_BLOCKSIZE);
     tickorder_ptr_arr[block_num] = tickorder_ptr;
     block_num++;
     while ( ! feof (pFile) )
@@ -249,6 +256,7 @@ SimDataManager* read_tick_order_from_file(const char* filename)
             if ( block_count == QUOTE_BLOCKSIZE )
             {
                 tickorder_ptr = new SimTickOrder[QUOTE_BLOCKSIZE];
+                memset(tickorder_ptr, 0, sizeof(SimTickOrder) * QUOTE_BLOCKSIZE);
                 tickorder_ptr_arr[block_num] = tickorder_ptr;
                 block_num++;
                 block_count = 0;
@@ -296,6 +304,7 @@ SimDataManager* read_tick_trade_from_file(const char* filename)
     }
     // 首次分配空间
     SimTickTrade* ticktrade_ptr = new SimTickTrade[QUOTE_BLOCKSIZE];
+    memset(ticktrade_ptr, 0, sizeof(SimTickTrade) * QUOTE_BLOCKSIZE);
     ticktrade_ptr_arr[block_num] = ticktrade_ptr;
     block_num++;
     while ( ! feof (pFile) )
@@ -313,6 +322,7 @@ SimDataManager* read_tick_trade_from_file(const char* filename)
             if ( block_count == QUOTE_BLOCKSIZE )
             {
                 ticktrade_ptr = new SimTickTrade[QUOTE_BLOCKSIZE];
+                memset(ticktrade_ptr, 0, sizeof(SimTickTrade) * QUOTE_BLOCKSIZE);
                 ticktrade_ptr_arr[block_num] = ticktrade_ptr;
                 block_num++;
                 block_count = 0;

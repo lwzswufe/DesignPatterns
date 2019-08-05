@@ -136,6 +136,7 @@ void *task_push_quote(void* arg)
         // 推送委托流
         while(tickorder_ptr->next != NULL)
         {   
+            int ex = tickorder_ptr->next->exchange_id;
             tickorder_ptr = tickorder_ptr->next;
             convert_tickorder(tickorder_ptr, tick_ptr);
             spi->OnTickByTick(tick_ptr);

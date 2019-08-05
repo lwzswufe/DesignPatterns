@@ -262,7 +262,7 @@ void Sim::simulate_trade(const SimTickTrade *ticktrade)
 {
     // 初始化
     int codenum = atoi(ticktrade->code);
-    if (ticktrade == NULL || codenum == 0 || !Sim::order_map[codenum].empty())
+    if (ticktrade == NULL || codenum == 0 || Sim::order_map[codenum].empty())
         return;
     // 倒序遍历订单 方便删除
     size_t order_num = Sim::order_map[codenum].size();
@@ -312,7 +312,7 @@ void Sim::load_data(bool is_am)
     {
         timetype = pm;
     }
-    printf("load %d %s data....\n", datenum, timetype);
+    printf(">>>>>load %d %s data start>>>>>\n", datenum, timetype);
     int year = datenum / 10000;
     int month = datenum % 10000 / 100;
     int date = datenum % 100;
@@ -327,7 +327,7 @@ void Sim::load_data(bool is_am)
     sprintf(filename,"%s/L2_data/%04d/%02d/%02d/%s_hq_trade_spot.csv", dirname, year, month, date, timetype);
     ticktrade_manager = read_tick_trade_from_file(filename);
 
-    printf("load %d %s data over\n", datenum, timetype);
+    printf(">>>>>load %d %s data over<<<<<\n", datenum, timetype);
 }
 
 bool Sim::check_is_need_load_data()
@@ -360,9 +360,9 @@ double Sim::Get_Clock()
 const SimStockInfo* Sim::Get_StockInfo()
 {   
     SimStockInfo* stockinfo_ptr = (SimStockInfo*) stockinfo_manager->current;
-    SimStockInfo* return_ptr = (SimStockInfo*)stockinfo_head_node, *last_ptr = return_ptr;
+    SimStockInfo* return_ptr = stockinfo_head_node, *last_ptr = return_ptr;
     return_ptr->next = NULL;
-    if (stockinfo_ptr != NULL)
+    if (stockinfo_ptr == NULL)
     {
         return return_ptr;
     }
@@ -372,13 +372,15 @@ const SimStockInfo* Sim::Get_StockInfo()
         last_ptr = stockinfo_ptr;
         ++stockinfo_ptr;
     }
+    return_ptr->next = NULL;
     return return_ptr;
 }
 
 const SimTickOrder* Sim::Get_TickOrder()
 {   
     SimTickOrder* tickorder_ptr = (SimTickOrder*) tickorder_manager->current;
-    SimTickOrder* return_ptr = (SimTickOrder*) tickorder_head_node, *last_ptr = return_ptr;
+    SimTickOrder* return_ptr = tickorder_head_node, *last_ptr = return_ptr;
+    return_ptr->next = NULL;
     if (tickorder_ptr == NULL)
     {   // 数据未初始化
         return return_ptr;
@@ -405,7 +407,7 @@ const SimTickOrder* Sim::Get_TickOrder()
     // 记录本次行情推送哪里
     tickorder_manager->current = tickorder_ptr;
     // 更新下一次行情更新时间
-    if (tickorder_ptr == tickorder_manager->end)
+    if (tickorder_ptr != tickorder_manager->end)
     {   // 若未到达末尾 更新时间
         update_time_next(tickorder_ptr->data_time);
     }
@@ -417,13 +419,15 @@ const SimTickOrder* Sim::Get_TickOrder()
         last_ptr = tickorder_ptr;
         tickorder_read_num++;
     }
+    return_ptr->next = NULL;
     return return_ptr;
 }
 
 const SimTickTrade* Sim::Get_TickTrade()
 {   
     SimTickTrade* ticktrade_ptr = (SimTickTrade*) ticktrade_manager->current;
-    SimTickTrade* return_ptr = (SimTickTrade*) ticktrade_head_node, *last_ptr = return_ptr;
+    SimTickTrade* return_ptr = ticktrade_head_node, *last_ptr = return_ptr;
+    return_ptr->next = NULL;
     if (ticktrade_ptr == NULL)
     {   // 数据未初始化
         return return_ptr;
@@ -451,7 +455,7 @@ const SimTickTrade* Sim::Get_TickTrade()
     // 记录本次行情推送哪里
     ticktrade_manager->current = ticktrade_ptr;
     // 更新下一次行情更新时间
-    if (ticktrade_ptr == ticktrade_manager->end)
+    if (ticktrade_ptr != ticktrade_manager->end)
     {   // 若未到达末尾 更新时间
         update_time_next(ticktrade_ptr->data_time);
     }
@@ -463,13 +467,15 @@ const SimTickTrade* Sim::Get_TickTrade()
         last_ptr = ticktrade_ptr;
         ticktrade_read_num++;
     }
+    return_ptr->next = NULL;
     return return_ptr;
 }
 
 const SimSnapData* Sim::Get_SnapData()
 {   
     SimSnapData* snapdata_ptr = (SimSnapData*) snapdata_manager->current;
-    SimSnapData* return_ptr = (SimSnapData*) snapdata_head_node, *last_ptr = return_ptr;
+    SimSnapData* return_ptr = snapdata_head_node, *last_ptr = return_ptr;
+    return_ptr->next = NULL;
     if (snapdata_ptr == NULL)
     {   // 数据未初始化
         return return_ptr;
@@ -495,17 +501,19 @@ const SimSnapData* Sim::Get_SnapData()
     // 记录本次行情推送哪里
     snapdata_manager->current = snapdata_ptr;
     // 更新下一次行情更新时间
-    if (snapdata_ptr == snapdata_manager->end)
+    if (snapdata_ptr != snapdata_manager->end)
     {   // 若未到达末尾 更新时间
         update_time_next(snapdata_ptr->data_time);
     }
+    return_ptr->next = NULL;
     return return_ptr;
 }
 
 const SimLevelData* Sim::Get_LevelData()
 {   
     SimLevelData* leveldata_ptr = (SimLevelData*) leveldata_manager->current;
-    SimLevelData* return_ptr = (SimLevelData*) leveldata_head_node, *last_ptr = NULL;
+    SimLevelData* return_ptr = leveldata_head_node, *last_ptr = return_ptr;
+    return_ptr->next = NULL;
     if (leveldata_ptr == NULL)
     {   // 数据未初始化
         return return_ptr;
@@ -531,10 +539,11 @@ const SimLevelData* Sim::Get_LevelData()
     // 记录本次行情推送哪里
     leveldata_manager->current = leveldata_ptr;
     // 更新下一次行情更新时间
-    if (leveldata_ptr == leveldata_manager->end)
+    if (leveldata_ptr != leveldata_manager->end)
     {   // 若未到达末尾 更新时间
         update_time_next(leveldata_ptr->data_time);
     }
+    return_ptr->next = NULL;
     return return_ptr;
 }
 
