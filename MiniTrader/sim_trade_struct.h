@@ -1,6 +1,8 @@
 //定义本地交易类相关数据结构
+#ifndef _SIM_QUOTE_STRUCT_H_
 #include "sim_quote_struct.h"
-
+#endif
+#define _SIM_TRADE_STRUCT_H_
 typedef char SIM_ORDERTYPE;
 typedef char SIM_ORDERSIDE;
 typedef char SIM_ORDERSTATE;

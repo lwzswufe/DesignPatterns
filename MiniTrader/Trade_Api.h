@@ -79,7 +79,7 @@ public:
 	///@param session_id 资金账户对应的session_id，登录时得到
 	///@param request_id 用于用户定位查询响应的ID，由用户自定义
 	///@remark 该方法支持分时段查询，如果股票代码为空，则默认查询时间段内的所有报单，否则查询时间段内所有跟股票代码相关的报单，此函数查询出的结果可能对应多个查询结果响应。此函数不建议轮询使用，当报单量过多时，容易造成用户线路拥堵，导致api断线
-	virtual int QueryOrders(const QueryOrderReq *query_param, uint64_t session_id, int request_id) = 0;
+	virtual int QueryOrders(const QueryOrderReq *query_param) = 0;
 
 	///请求查询投资者持仓
 	///@return 查询是否成功，“0”表示成功，非“0”表示出错，此时用户可以调用GetApiLastError()来获取错误代码
@@ -87,7 +87,7 @@ public:
 	///@param session_id 资金账户对应的session_id,登录时得到
 	///@param request_id 用于用户定位查询响应的ID，由用户自定义
 	///@remark 该方法如果用户提供了合约代码，则会查询此合约的持仓信息，如果合约代码为空，则默认查询所有持仓信息
-	virtual int QueryPosition(const char *ticker, uint64_t session_id, int request_id) = 0;
+	virtual int QueryPosition(const char *ticker) = 0;
 
 protected:
 	~TradeApi() {};

@@ -1,8 +1,7 @@
 // 接受本地数据转并返回 回测系统需要的数据结构
 
 // 本地数据结构
-#ifndef _SIM_QUOTE_STRUCT_
-#define _SIM_QUOTE_STRUCT_
+#ifndef _SIM_QUOTE_STRUCT_H_
 #include "sim_quote_struct.h"
 #endif
 // 回测数据结构

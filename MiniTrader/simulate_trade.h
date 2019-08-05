@@ -1,8 +1,12 @@
 /*
 模拟交易
 */
+#ifndef _SIM_QUOTE_STRUCT_H_
 #include "sim_quote_struct.h"
+#endif
+#ifndef _SIM_Trade_STRUCT_H_
 #include "sim_trade_struct.h"
+#endif
 #include <vector>
 using std::vector;
 #include <map>
@@ -61,6 +65,17 @@ namespace Sim
     extern SimDataManager* tickorder_manager;
     // 逐笔成交数据数据管理结构体
     extern SimDataManager* ticktrade_manager;
+
+    // 股票静态数据返回链表头节点
+    extern SimStockInfo* stockinfo_head_node;
+    // 股票快照数据返回链表头节点
+    extern SimSnapData* snapdata_head_node;
+    // 股票10档行情数据返回链表头节点
+    extern SimLevelData* leveldata_head_node;
+    // 逐笔委托数据返回链表头节点
+    extern SimTickOrder* tickorder_head_node;
+    // 逐笔成交数据返回链表头节点
+    extern SimTickTrade* ticktrade_head_node;
 
     // 数据初始化
     void initial_generator_data();

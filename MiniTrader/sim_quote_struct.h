@@ -1,3 +1,4 @@
+#define _SIM_QUOTE_STRUCT_H_
 //定义本地行情类相关数据结构
 #define SIM_EXCHANGE_SH 1
 #define SIM_EXCHANGE_SZ 2
@@ -171,7 +172,5 @@ struct SimDataManager
     // 数据末尾指针
     void *end;           
     // 数据当前指针
-    void *current;       
-    // 用作返回数据时的起始节点指针
-    void *head;   
+    void *current;        
 };

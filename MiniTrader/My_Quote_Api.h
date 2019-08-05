@@ -1,4 +1,3 @@
-#include "Quote_Api.h"
 #include "Quote_Spi.h"
 
 // 行情推送线程参数结构体

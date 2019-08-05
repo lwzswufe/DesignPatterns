@@ -3,13 +3,13 @@ cmake_minimum_required(VERSION 2.6)
 PROJECT(MiniTrader)
 
 # SET指令的语法是  SET(VAR [VALUE] [CACHE TYPE DOCSTRING [FORCE]])
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g")
 
 set(platform x64)
 
 # 为多个源文件定义别名
 set(SOURCE_FILES Read_ini.cpp My_Quote_Api_Test.cpp simulate_trade.cpp 
-    My_Quote_Api.cpp Quote_Spi.cpp sim_trade_convert.cpp read_local_quote.cpp，
+    My_Quote_Api.cpp Quote_Spi.cpp sim_trade_convert.cpp read_local_quote.cpp
     My_Trade_Api.cpp Trade_Spi.cpp sim_quote_convert.cpp )
 
 # 为多个头文件定义别名

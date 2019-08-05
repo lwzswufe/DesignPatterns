@@ -16,7 +16,8 @@ void MyTradeApi::RegisterSpi(TradeSpi *spi)
 }
 
 uint64_t  MyTradeApi::Login()
-{
+{   
+    printf("trade_api login\n");
     return 0;
 }
 
@@ -49,6 +50,16 @@ MyTradeApi::MyTradeApi(uint8_t client_id)
     this->trade_param.spi = NULL;
 }
 
+int MyTradeApi::QueryOrders(const QueryOrderReq *query_param)
+{
+    return 0;
+}
+
+int MyTradeApi::QueryPosition(const char *ticker)
+{   
+    start_push_trade_thread();
+    return 0;
+}
 
 void MyTradeApi::start_push_trade_thread()
 {   

@@ -37,7 +37,7 @@ void convert_depthdata(const SimSnapData* snap_ptr, const SimLevelData* level_pt
     {
         case SIM_EXCHANGE_SZ: data_ptr->exchange_id=EXCHANGE_SZ; break;
         case SIM_EXCHANGE_SH: data_ptr->exchange_id=EXCHANGE_SH; break;
-        default:                data_ptr->exchange_id=EXCHANGE_UNKNOWN;
+        default:              data_ptr->exchange_id=EXCHANGE_UNKNOWN;
     }
     // 合约代码
     strncpy(data_ptr->ticker, snap_ptr->code, SIM_CODESIZE);

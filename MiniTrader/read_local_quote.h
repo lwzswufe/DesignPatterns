@@ -1,5 +1,5 @@
-#ifndef _SIM_QUOTE_STRUCT_
-#define _SIM_QUOTE_STRUCT_
+#ifndef _SIM_QUOTE_STRUCT_H_
+#define _SIM_QUOTE_STRUCT_H_
 #include "sim_quote_struct.h"
 #endif
 #define QUOTE_LINESIZE 1024

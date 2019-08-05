@@ -1,4 +1,6 @@
+#ifndef _QUOTE_API_H_
 #include "Quote_Api.h"
+#endif
 
 #define NUM_OF_ROUND 1
 

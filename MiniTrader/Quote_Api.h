@@ -1,5 +1,5 @@
-#ifndef QUOTE_API_H_
-#define QUOTE_API_H_
+#ifndef _QUOTE_API_H_
+#define _QUOTE_API_H_
 #include "Quote_Api_Struct.h"
 
 /*!

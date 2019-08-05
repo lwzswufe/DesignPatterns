@@ -76,7 +76,7 @@ double MyQuoteApi::GetClock()
     return ApiTimenum;
 }
 
-int ApiTimenum;
+int ApiTimenum = 0;
 
 int GetTimenum()
 {
@@ -87,15 +87,11 @@ int GetTimenum()
 void *task_push_quote(void* arg)
 {   
     Quote_Push_Param_Struct *param = (Quote_Push_Param_Struct*)arg;
-    printf("ini_file:%s\n", param->ini_file);
+    // printf("ini_file:%s\n", param->ini_file);
     Sim::initial_generator_data();
     Sim::quote_start = true;
     printf("SIM::quote_start\n");
-    // wait for start trade
-    // while (!Sim::trade_start)
-    // {
-    //     sleep(1);
-    // }
+
     double * clock_ptr = &(param->clock);
     QuoteSpi* spi = param->spi;
     // xtp数据指针
