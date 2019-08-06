@@ -65,6 +65,8 @@ namespace Sim
     extern SimDataManager* tickorder_manager;
     // 逐笔成交数据数据管理结构体
     extern SimDataManager* ticktrade_manager;
+    // 持仓数据管理结构体
+    extern SimDataManager* position_manager;
 
     // 股票静态数据返回链表头节点
     extern SimStockInfo* stockinfo_head_node;
@@ -76,6 +78,10 @@ namespace Sim
     extern SimTickOrder* tickorder_head_node;
     // 逐笔成交数据返回链表头节点
     extern SimTickTrade* ticktrade_head_node;
+    // 订单数据返回链表头节点
+    extern SimOrder*  simorder_head_node; 
+    // 持仓数据返回头节点
+    extern SimPosition* position_head_node;
 
     // 数据初始化
     void initial_generator_data();
@@ -103,6 +109,8 @@ namespace Sim
 
     // 载入上午/下午的数据
     void load_data(bool is_am);
+    // 释放数据内存管理指针
+    void release_simdatamanager(SimDataManager* manager);
     // 判断是否需要载入数据 若所有数据指针都为NULL就返回true 否则返回false
     bool check_is_need_load_data();
     // 获取当前时间 HHMMSS
@@ -131,6 +139,14 @@ namespace Sim
     // 返回链表头结点指针 通过next访问其他元素
     // 头结点指针数据无意义
     const SimLevelData* Get_LevelData();
+    // 获取已报订单数据
+    // 返回链表头结点指针 通过next访问其他元素
+    // 头结点指针数据无意义
+    const SimOrder* Get_Order();
+    // 获取持仓数据
+    // 返回链表头结点指针 通过next访问其他元素
+    // 头结点指针数据无意义
+    const SimPosition* Get_Position();
     // 更新时间
     void update_time();  
     // 更新下一次数据更新时间

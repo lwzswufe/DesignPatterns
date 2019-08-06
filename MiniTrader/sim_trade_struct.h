@@ -26,6 +26,7 @@ struct SimOrder
     int account_id;                                           // 账户编号
     int exchange_id;                                          // 交易所代码
     char code[SIM_CODESIZE];                                  // 证券代码
+    SimOrder* next;                                           // 下一个订单数据
 };
 
 struct SimPosition
@@ -36,6 +37,7 @@ struct SimPosition
     int account_id;                                            // 账户编号
     int exchange_id;                                           // 交易所代码
     char code[SIM_CODESIZE];                                   // 股票持仓
+    SimPosition* next;                                         // 下一个持仓数据
 };
 
 struct SimTradeReport

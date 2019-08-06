@@ -130,6 +130,8 @@ void *task_push_quote(void* arg)
                 is_am = false;
                 Sim::load_data(is_am);
             }
+            else 
+                break;
         }
         ticktrade_ptr = Sim::Get_TickTrade();
         tickorder_ptr = Sim::Get_TickOrder();

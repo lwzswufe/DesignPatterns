@@ -54,6 +54,8 @@ namespace Sim
     SimDataManager* tickorder_manager;
     // 逐笔成交数据数据管理结构体
     SimDataManager* ticktrade_manager;
+    // 持仓数据管理结构体
+    SimDataManager* position_manager;
 
     // 股票静态数据返回链表头节点
     SimStockInfo* stockinfo_head_node;
@@ -65,7 +67,10 @@ namespace Sim
     SimTickOrder* tickorder_head_node;
     // 逐笔成交数据返回链表头节点
     SimTickTrade* ticktrade_head_node;
-
+    // 订单数据返回链表头节点
+    SimOrder* simorder_head_node; 
+    // 持仓数据返回头节点
+    SimPosition* position_head_node;
 } // namespace Sim
 
 void Sim::initial_generator_data()
@@ -91,7 +96,7 @@ void Sim::initial_generator_data()
     // time_now = datenum * 1000000 * 1000 + 90000 * 1000;
     time_now = 90000 * 1000;
     printf("init time:%ld\n", time_now);
-    // 数组指针初始化
+    // 数组指针初始化 确保 正常状态下stockinfo_manager不为NULL
     SimDataManager* stockinfo_manager = new SimDataManager;
     memset(stockinfo_manager, 0, sizeof(SimDataManager));
     SimDataManager* snapdata_manager = new SimDataManager;
@@ -258,6 +263,23 @@ SimTickTrade *Sim::simulate_trade(const SimTickTrade *ticktrade, SimOrder *order
     return new_ticktrade;
 }
 
+void Sim::release_simdatamanager(SimDataManager* manager)
+{
+    if (manager == NULL)
+    {
+        //printf("error: simdatamanager has been released\n");
+    }
+    else if (manager->begin != NULL)
+    {
+        printf("error: we can not release simdatamanager before release data\n");
+    }
+    else
+    {
+        delete manager;
+        manager = NULL;
+    }
+}
+
 void Sim::simulate_trade(const SimTickTrade *ticktrade)
 {
     // 初始化
@@ -305,7 +327,7 @@ void Sim::load_data(bool is_am)
     {   //上午需载入股票信息数据
         timetype = am;
         sprintf(filename,"%s/uplimit_list.csv", dirname);
-        stockinfo_manager = read_stock_info_from_file(filename, datenum);
+        stockinfo_manager = read_stock_info_from_file(filename, stockinfo_manager, datenum);
         printf("stockinfo_head_node:%p\n", stockinfo_head_node);
     }
     else 
@@ -318,21 +340,22 @@ void Sim::load_data(bool is_am)
     int date = datenum % 100;
 
     // 载入数据
+    position_manager = read_snap_data_from_file("position.txt", position_manager);
     sprintf(filename,"%s/L2_data/%04d/%02d/%02d/%s_hq_snap_spot.csv", dirname, year, month, date, timetype);
-    snapdata_manager = read_snap_data_from_file(filename);
+    snapdata_manager = read_snap_data_from_file(filename, snapdata_manager);
     sprintf(filename,"%s/L2_data/%04d/%02d/%02d/%s_snap_level_spot.csv", dirname, year, month, date, timetype);
-    leveldata_manager = read_level_data_from_file(filename);
+    leveldata_manager = read_level_data_from_file(filename, leveldata_manager);
     sprintf(filename,"%s/L2_data/%04d/%02d/%02d/%s_hq_order_spot.csv", dirname, year, month, date, timetype);
-    tickorder_manager = read_tick_order_from_file(filename);
+    tickorder_manager = read_tick_order_from_file(filename, tickorder_manager);
     sprintf(filename,"%s/L2_data/%04d/%02d/%02d/%s_hq_trade_spot.csv", dirname, year, month, date, timetype);
-    ticktrade_manager = read_tick_trade_from_file(filename);
+    ticktrade_manager = read_tick_trade_from_file(filename, ticktrade_manager);
 
     printf(">>>>>load %d %s data over<<<<<\n", datenum, timetype);
 }
 
 bool Sim::check_is_need_load_data()
 {
-    if (tickorder_manager->current != tickorder_manager->end &&
+    if (tickorder_manager->current == NULL &&
         ticktrade_manager->begin == NULL &&
         snapdata_manager->begin == NULL &&
         leveldata_manager->begin == NULL)
@@ -359,13 +382,13 @@ double Sim::Get_Clock()
 
 const SimStockInfo* Sim::Get_StockInfo()
 {   
-    SimStockInfo* stockinfo_ptr = (SimStockInfo*) stockinfo_manager->current;
+    
     SimStockInfo* return_ptr = stockinfo_head_node, *last_ptr = return_ptr;
     return_ptr->next = NULL;
+    SimStockInfo* stockinfo_ptr = (SimStockInfo*) stockinfo_manager->current;
     if (stockinfo_ptr == NULL)
-    {
         return return_ptr;
-    }
+    
     while (stockinfo_ptr != stockinfo_manager->end)
     {   // 若当前数据时间小于等于系统时间 就返回当前指针 再++当前指针   
         last_ptr->next = stockinfo_ptr;    
@@ -378,22 +401,22 @@ const SimStockInfo* Sim::Get_StockInfo()
 
 const SimTickOrder* Sim::Get_TickOrder()
 {   
-    SimTickOrder* tickorder_ptr = (SimTickOrder*) tickorder_manager->current;
     SimTickOrder* return_ptr = tickorder_head_node, *last_ptr = return_ptr;
     return_ptr->next = NULL;
+    SimTickOrder* tickorder_ptr = (SimTickOrder*) tickorder_manager->current;
     if (tickorder_ptr == NULL)
     {   // 数据未初始化
         return return_ptr;
     }
     if (tickorder_ptr == tickorder_manager->end)
     {   // 当前数据指针移动到数组末尾 释放内存
-        // if (tickorder_manager->begin != NULL)
-        // {   
-        //     SimTickOrder* tickorder_array = (SimTickOrder*)tickorder_manager->begin;
-        //     delete[] tickorder_array;
-        // }
-        // memset(tickorder_manager, 0, sizeof(SimDataManager));
-        // printf("release SimTickOrder Array\n");
+        if (tickorder_manager->begin != NULL)
+        {   
+            SimTickOrder* tickorder_array = (SimTickOrder*)tickorder_manager->begin;
+            delete[] tickorder_array;
+        }
+        memset(tickorder_manager, 0, sizeof(SimDataManager));
+        printf("release SimTickOrder Array\n");
         return return_ptr;
     }
     while (tickorder_ptr != tickorder_manager->end &&
@@ -425,22 +448,22 @@ const SimTickOrder* Sim::Get_TickOrder()
 
 const SimTickTrade* Sim::Get_TickTrade()
 {   
-    SimTickTrade* ticktrade_ptr = (SimTickTrade*) ticktrade_manager->current;
+    
     SimTickTrade* return_ptr = ticktrade_head_node, *last_ptr = return_ptr;
-    return_ptr->next = NULL;
-    if (ticktrade_ptr == NULL)
-    {   // 数据未初始化
+    return_ptr->next = NULL; 
+    SimTickTrade* ticktrade_ptr = (SimTickTrade*) ticktrade_manager->current;
+    if (ticktrade_ptr == NULL) // 数据未初始化
         return return_ptr;
-    }
+
     if (ticktrade_ptr == ticktrade_manager->end)
     {   // 当前数据指针移动到数组末尾 释放内存
-        // if (ticktrade_manager->begin != NULL)
-        // {   
-        //     SimTickTrade* ticktrade_array = (SimTickTrade*)ticktrade_manager->begin;
-        //     delete[] ticktrade_array;
-        // }
-        // memset(ticktrade_manager, 0, sizeof(SimDataManager));
-        // printf("release SimTickTrade Array\n");
+        if (ticktrade_manager->begin != NULL)
+        {   
+            SimTickTrade* ticktrade_array = (SimTickTrade*)ticktrade_manager->begin;
+            delete[] ticktrade_array;
+        }
+        memset(ticktrade_manager, 0, sizeof(SimDataManager));
+        printf("release SimTickTrade Array\n");
         return return_ptr;
     }
     while (ticktrade_ptr != ticktrade_manager->end &&
@@ -473,24 +496,23 @@ const SimTickTrade* Sim::Get_TickTrade()
 
 const SimSnapData* Sim::Get_SnapData()
 {   
-    SimSnapData* snapdata_ptr = (SimSnapData*) snapdata_manager->current;
     SimSnapData* return_ptr = snapdata_head_node, *last_ptr = return_ptr;
     return_ptr->next = NULL;
-    if (snapdata_ptr == NULL)
-    {   // 数据未初始化
+    SimSnapData* snapdata_ptr = (SimSnapData*) snapdata_manager->current;
+    if (snapdata_ptr == NULL) // 数据未初始化
+        return return_ptr;
+
+    if (snapdata_ptr == snapdata_manager->end)
+    {   // 当前数据指针移动到数组末尾 释放内存
+        if (snapdata_manager->begin != NULL)
+        {   
+            SimSnapData* snapdata_array = (SimSnapData*)snapdata_manager->begin;
+            delete[] snapdata_array;
+        }
+        memset(snapdata_manager, 0, sizeof(SimDataManager));
+        printf("release SimSnapData Array\n");
         return return_ptr;
     }
-    // if (snapdata_ptr == snapdata_manager->end)
-    // {   // 当前数据指针移动到数组末尾 释放内存
-        // if (snapdata_manager->begin != NULL)
-        // {   
-        //     SimSnapData* snapdata_array = (SimSnapData*)snapdata_manager->begin;
-        //     delete[] snapdata_array;
-        // }
-        // memset(snapdata_manager, 0, sizeof(SimDataManager));
-        // printf("release SimSnapData Array\n");
-    //     return return_ptr;
-    // }
     while (snapdata_ptr != snapdata_manager->end &&
            snapdata_ptr->data_time <= time_now)
     {   // 若当前数据时间小于等于系统时间 就返回当前指针 再++当前指针   
@@ -511,24 +533,23 @@ const SimSnapData* Sim::Get_SnapData()
 
 const SimLevelData* Sim::Get_LevelData()
 {   
-    SimLevelData* leveldata_ptr = (SimLevelData*) leveldata_manager->current;
     SimLevelData* return_ptr = leveldata_head_node, *last_ptr = return_ptr;
     return_ptr->next = NULL;
-    if (leveldata_ptr == NULL)
-    {   // 数据未初始化
+    SimLevelData* leveldata_ptr = (SimLevelData*) leveldata_manager->current;
+    if (leveldata_ptr == NULL) // 数据未初始化
+        return return_ptr;
+
+    if (leveldata_ptr == leveldata_manager->end)
+    {   // 当前数据指针移动到数组末尾 释放内存
+        if (leveldata_manager->begin != NULL)
+        {   
+            SimLevelData* leveldata_array = (SimLevelData*)leveldata_manager->begin;
+            delete[] leveldata_array;
+        }
+        memset(leveldata_manager, 0, sizeof(SimDataManager));
+        printf("release SimLevelData Array\n");
         return return_ptr;
     }
-    // if (leveldata_ptr == leveldata_manager->end)
-    // {   // 当前数据指针移动到数组末尾 释放内存
-        // if (leveldata_manager->begin != NULL)
-        // {   
-        //     SimLevelData* leveldata_array = (SimLevelData*)leveldata_manager->begin;
-        //     delete[] leveldata_array;
-        // }
-        // memset(leveldata_manager, 0, sizeof(SimDataManager));
-        // printf("release SimLevelData Array\n");
-    //     return return_ptr;
-    // }
     while (leveldata_ptr != leveldata_manager->end &&
            leveldata_ptr->data_time <= time_now)
     {   // 若当前数据时间小于等于系统时间 就返回当前指针 再++当前指针   
@@ -542,6 +563,38 @@ const SimLevelData* Sim::Get_LevelData()
     if (leveldata_ptr != leveldata_manager->end)
     {   // 若未到达末尾 更新时间
         update_time_next(leveldata_ptr->data_time);
+    }
+    return_ptr->next = NULL;
+    return return_ptr;
+}
+
+const SimOrder* Sim::Get_Order()
+{
+    SimOrder* return_ptr = simorder_head_node, *last_ptr = return_ptr;
+    return_ptr->next = NULL;
+    if (localorder_vec.size == 0) // 数据未初始化
+        return return_ptr;
+    for (SimOrder* simorder : localorder_vec)
+    {
+        last_ptr->next = simorder;
+        last_ptr = simorder;
+    }
+    return_ptr->next = NULL;
+    return return_ptr;
+}
+
+const SimPosition* Sim::Get_Position()
+{
+    SimPosition* return_ptr = position_head_node, *last_ptr = return_ptr;
+    SimPosition* position_ptr = (SimPosition*)position_manager->begin;
+    return_ptr->next = NULL;
+    if (localorder_vec.size == 0) // 数据未初始化
+        return return_ptr;
+    while (position_ptr != position_manager->end)
+    {
+        last_ptr->next = position_ptr;
+        last_ptr = position_ptr;
+        position_ptr++;
     }
     return_ptr->next = NULL;
     return return_ptr;

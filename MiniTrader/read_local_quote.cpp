@@ -21,7 +21,7 @@ void split_line_to_word_array(char* line, const char* separator, char** word_arr
         word_array[i] = NULL;
 }
 
-SimDataManager* read_stock_info_from_file(const char* filename, const int date)
+SimDataManager* read_stock_info_from_file(const char* filename, SimDataManager* data_manager, const int date)
 {   
     FILE * pFile;
     char line[QUOTE_LINESIZE];
@@ -78,17 +78,20 @@ SimDataManager* read_stock_info_from_file(const char* filename, const int date)
         memcpy(stockinfo_ptr + QUOTE_BLOCKSIZE * block_id, stockinfo_ptr_arr[block_id], sizeof(SimStockInfo) * block_size);
         delete[] stockinfo_ptr_arr[block_id];
     }
-    SimDataManager *data_manager = new SimDataManager;
-    memset(data_manager, 0, sizeof(SimDataManager));
+    if (data_manager == NULL)
+    {
+        data_manager = new SimDataManager;
+        memset(data_manager, 0, sizeof(SimDataManager));
+    }
     data_manager->begin = stockinfo_ptr;
     data_manager->end = stockinfo_ptr + total_num;
-    data_manager->current = data_manager->begin;
+    data_manager->current = data_manager->begin;;
     printf("date:%d stock_num:%lu\n", date, total_num);
     return data_manager;
 }
 
 // 从文件里读取深度行情
-SimDataManager* read_snap_data_from_file(const char* filename)
+SimDataManager* read_snap_data_from_file(const char* filename, SimDataManager* data_manager)
 {
     FILE * pFile;
     char line[QUOTE_LINESIZE];
@@ -145,8 +148,11 @@ SimDataManager* read_snap_data_from_file(const char* filename)
         memcpy(snapdata_ptr + QUOTE_BLOCKSIZE * block_id, snapdata_ptr_arr[block_id], sizeof(SimSnapData) * block_size);
         delete[] snapdata_ptr_arr[block_id];
     }
-    SimDataManager *data_manager = new SimDataManager;
-    memset(data_manager, 0, sizeof(SimDataManager));
+    if (data_manager == NULL)
+    {
+        data_manager = new SimDataManager;
+        memset(data_manager, 0, sizeof(SimDataManager));
+    }
     data_manager->begin = snapdata_ptr;
     data_manager->end = snapdata_ptr + total_num;
     data_manager->current = data_manager->begin;
@@ -154,7 +160,7 @@ SimDataManager* read_snap_data_from_file(const char* filename)
     return data_manager;
 }
 
-SimDataManager* read_level_data_from_file(const char* filename)
+SimDataManager* read_level_data_from_file(const char* filename, SimDataManager* data_manager)
 {
     FILE * pFile;
     char line[QUOTE_LINESIZE];
@@ -210,8 +216,11 @@ SimDataManager* read_level_data_from_file(const char* filename)
         memcpy(leveldata_ptr + QUOTE_BLOCKSIZE * block_id, leveldata_ptr_arr[block_id], sizeof(SimLevelData) * block_size);
         delete[] leveldata_ptr_arr[block_id];
     }
-    SimDataManager *data_manager = new SimDataManager;
-    memset(data_manager, 0, sizeof(SimDataManager));
+    if (data_manager == NULL)
+    {
+        data_manager = new SimDataManager;
+        memset(data_manager, 0, sizeof(SimDataManager));
+    }
     data_manager->begin = leveldata_ptr;
     data_manager->end = leveldata_ptr + total_num;
     data_manager->current = data_manager->begin;
@@ -221,7 +230,7 @@ SimDataManager* read_level_data_from_file(const char* filename)
 
 
 // 从文件里读取逐笔委托
-SimDataManager* read_tick_order_from_file(const char* filename)
+SimDataManager* read_tick_order_from_file(const char* filename, SimDataManager* data_manager)
 {
     FILE * pFile;
     char line[QUOTE_LINESIZE];
@@ -277,8 +286,11 @@ SimDataManager* read_tick_order_from_file(const char* filename)
         memcpy(tickorder_ptr + QUOTE_BLOCKSIZE * block_id, tickorder_ptr_arr[block_id], sizeof(SimTickOrder) * block_size);
         delete[] tickorder_ptr_arr[block_id];
     }
-    SimDataManager *data_manager = new SimDataManager;
-    memset(data_manager, 0, sizeof(SimDataManager));
+    if (data_manager == NULL)
+    {
+        data_manager = new SimDataManager;
+        memset(data_manager, 0, sizeof(SimDataManager));
+    }
     data_manager->begin = tickorder_ptr;
     data_manager->end = tickorder_ptr + total_num;
     data_manager->current = data_manager->begin;
@@ -287,7 +299,7 @@ SimDataManager* read_tick_order_from_file(const char* filename)
 }
 
 // 从文件里读取逐笔成交
-SimDataManager* read_tick_trade_from_file(const char* filename)
+SimDataManager* read_tick_trade_from_file(const char* filename, SimDataManager* data_manager)
 {
     FILE * pFile;
     char line[QUOTE_LINESIZE];
@@ -343,12 +355,61 @@ SimDataManager* read_tick_trade_from_file(const char* filename)
         memcpy(ticktrade_ptr + QUOTE_BLOCKSIZE * block_id, ticktrade_ptr_arr[block_id], sizeof(SimTickTrade) * block_size);
         delete[] ticktrade_ptr_arr[block_id];
     }
-    SimDataManager *data_manager = new SimDataManager;
-    memset(data_manager, 0, sizeof(SimDataManager));
+    if (data_manager == NULL)
+    {
+        data_manager = new SimDataManager;
+        memset(data_manager, 0, sizeof(SimDataManager));
+    }
     data_manager->begin = ticktrade_ptr;
     data_manager->end = ticktrade_ptr + total_num;
     data_manager->current = data_manager->begin;
     printf("get %ld ticktrade data\n", total_num);
+    return data_manager;
+}
+
+SimDataManager* read_position_from_file(const char* filename, SimDataManager* data_manager)
+{
+    FILE * pFile;
+    char line[QUOTE_LINESIZE];
+    size_t total_num = 0, block_num = 0, block_count = 0;
+    SimPosition position_arr[QUOTE_BLOCKNUM];
+    memset(position_arr, 0, sizeof(SimPosition) * QUOTE_BLOCKNUM);
+    pFile = fopen(filename , "r");
+    if ( pFile == NULL ) 
+    {   
+        char s[256];
+        sprintf(s, "Error opening file:%s", filename);
+        perror(s);
+        return NULL;
+    }
+    SimPosition* position_ptr = position_arr;
+    while ( ! feof (pFile) )
+    {   
+        // 读取到文件末尾
+        if ( fgets (line , QUOTE_LINESIZE , pFile) == NULL ) 
+            break;
+        // 按行读取数据
+        if ( read_position_from_line(line, position_ptr) )
+        {   
+            total_num++;
+            position_ptr++;
+        }
+    }
+    fclose (pFile);
+    // 为所有数据分配新空间
+    position_ptr = new SimPosition[total_num];
+    size_t block_size;
+    // 依次将每一个块的数据拷贝到新空间中去
+    memcpy(position_ptr, position_arr, sizeof(SimPosition) * total_num);
+    if (data_manager == NULL)
+    {
+        data_manager = new SimDataManager;
+        memset(data_manager, 0, sizeof(SimDataManager));
+    }
+    data_manager->begin = position_ptr;
+    data_manager->end = position_ptr + total_num;
+    data_manager->current = data_manager->begin;;
+    printf("get position_num:%lu\n", total_num);
     return data_manager;
 }
 
@@ -549,5 +610,34 @@ bool read_tick_trade_from_line(char* line, SimTickTrade* ptr)
     }
     strncpy(ptr->code, code, 6);
     ptr->code[6] = 0;
+    return true;
+}
+
+bool read_position_from_line(char* line, SimPosition* position_ptr)
+{   // 数据格式 600000SH,300,100,20.00,1\n
+    // 数据格式 证券代码,总持仓,可卖持仓,持仓价,账户ID\n
+    if (line == NULL || position_ptr == NULL || strlen(line) < 10)
+        return false;
+    // 获取市场与证券代码
+    char market;
+    market = line[7];
+    switch(market)
+    {
+        case 'H': position_ptr->exchange_id = SIM_EXCHANGE_SH; break;
+        case 'Z': position_ptr->exchange_id = SIM_EXCHANGE_SZ; break;
+        default : return false;
+    }
+    strncpy(position_ptr->code, line, 6);
+    position_ptr->code[6] = 0;
+    // 获取价格与数量信息
+    const int word_num = 5;
+    char * word_array[word_num];
+    const char *tab = ",";
+    split_line_to_word_array(line, tab, word_array, word_num);
+
+    position_ptr->total_qty = atoi(word_array[1]);
+    position_ptr->sellable_qty = atoi(word_array[2]);
+    position_ptr->price = atof(word_array[3]);
+    position_ptr->account_id = atoi(word_array[4]);
     return true;
 }
