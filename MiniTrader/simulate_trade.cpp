@@ -27,6 +27,10 @@ namespace Sim
     bool quote_start = false;
     // 交易是否启动
     bool trade_start = false;
+    // 是否订阅持仓
+    bool is_subscribe_position = false;
+    // 是否订阅订单信息
+    bool is_subscribe_order = false;
     // 储存每个股票的订单
     map<int, deque<SimOrder *>> order_map;
     // 缓存最近生成成交记录 链表
@@ -132,6 +136,7 @@ unsigned Sim::cancel_order(unsigned order_id)
     {
         SimOrder *order = localorder_vec[order_id - 1];
         SimTickTrade *ticktrade;
+        SimTradeReport* tradereport;
         switch (order->state)
         {
         case SIM_ORDERSTATE_CANCELED:
@@ -144,11 +149,14 @@ unsigned Sim::cancel_order(unsigned order_id)
         case SIM_ORDERSTATE_SENDED:
             order->state = SIM_ORDERSTATE_CANCELED;
             ticktrade = convert_order_struct(order, SIM_TRADETYPE_CANCEL);
+            // 推送至成交流
             ticktrade_vec.push_back(ticktrade);
+            // 推送至订单回报
+            tradereport = new SimTradeReport{order, ticktrade, NULL}; 
+            tradereport_vec.push_back(tradereport);
             break;
         default:
             printf("error cancel order_id:%u this order is error\n", order_id);
-            break;
         }
     }
     return cancelorder_num + 2000;
@@ -572,7 +580,10 @@ const SimOrder* Sim::Get_Order()
 {
     SimOrder* return_ptr = simorder_head_node, *last_ptr = return_ptr;
     return_ptr->next = NULL;
-    if (localorder_vec.size == 0) // 数据未初始化
+    if (!is_subscribe_order)     // 未订阅数据
+        return return_ptr;
+    is_subscribe_order = false;
+    if (localorder_vec.size() == 0) // 数据未初始化
         return return_ptr;
     for (SimOrder* simorder : localorder_vec)
     {
@@ -586,10 +597,13 @@ const SimOrder* Sim::Get_Order()
 const SimPosition* Sim::Get_Position()
 {
     SimPosition* return_ptr = position_head_node, *last_ptr = return_ptr;
-    SimPosition* position_ptr = (SimPosition*)position_manager->begin;
     return_ptr->next = NULL;
-    if (localorder_vec.size == 0) // 数据未初始化
+    if (!is_subscribe_position)     // 未订阅数据
         return return_ptr;
+    is_subscribe_position = false;
+    if (localorder_vec.size() == 0) // 数据未初始化
+        return return_ptr;
+    SimPosition* position_ptr = (SimPosition*)position_manager->begin;
     while (position_ptr != position_manager->end)
     {
         last_ptr->next = position_ptr;
@@ -614,4 +628,14 @@ void Sim::update_time_next(int64_t data_time)
     // 系统下一次推送行情时间小于下一个数据的时间 设置 系统下一次推送行情时间 为 下一个数据的时间
     else if (time_next <= time_now)
         time_next = data_time;
+}
+
+void Sim::subscribe_order()
+{
+    is_subscribe_position = true;
+}
+
+void Sim::subscribe_position()
+{   
+    is_subscribe_order = true;
 }

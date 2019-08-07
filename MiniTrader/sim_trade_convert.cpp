@@ -128,3 +128,26 @@ void convert_trade_struct(const SimTradeReport* simtradereport, TradeReport* tra
         printf("error market %d in file:%s line:%d\n", simorder->exchange_id, __FILE__, __LINE__);
     }
 }
+
+void convert_position_struct(const SimPosition* simposition, QueryStkPositionRsp* position_info)
+{
+    if (simposition == NULL || position_info == NULL)
+        return;
+    memset(position_info, 0, sizeof(QueryStkPositionRsp));
+    strncpy(position_info->ticker, simposition->code, SIM_CODESIZE);
+    position_info->total_qty = simposition->total_qty;
+    position_info->sellable_qty = simposition->sellable_qty;
+    position_info->avg_price = simposition->price;
+    position_info->position_direction = POSITION_DIRECTION_LONG; // 默认多头仓位
+    switch (simposition->exchange_id)
+    {
+    case SIM_EXCHANGE_SH:
+        position_info->market = MKT_SZ_A;    
+        break;
+    case SIM_EXCHANGE_SZ:
+        position_info->market = MKT_SH_A;
+        break;
+    default:
+        printf("error market %d in file:%s line:%d\n", simposition->exchange_id, __FILE__, __LINE__);
+    }
+}

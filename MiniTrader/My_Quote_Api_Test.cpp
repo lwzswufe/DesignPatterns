@@ -28,9 +28,13 @@ int main_program()
 
     api_quote->QueryAllTickers(EXCHANGE_SZ);
     now_timenum = GetTimenum();
+
+    api_trade->QueryOrders(NULL);
+    api_trade->QueryPosition(NULL);
+
     printf("timenum:%d\n", now_timenum);
     while (now_timenum < 150000)
-    {
+    {   
         if (last_timenum + 100 < now_timenum)
         {   
             last_timenum = now_timenum;
@@ -41,7 +45,7 @@ int main_program()
     printf("timenum:%d  timeout\n", now_timenum);
     api_quote->Logout();
     api_trade->Logout();
-    printf("%s test over", __FILE__);
+    printf(">>>>>>>>%s test over<<<<<<<<<<<\n", __FILE__);
     return 0;
 }
 

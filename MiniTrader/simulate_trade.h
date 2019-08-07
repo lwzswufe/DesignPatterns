@@ -82,16 +82,21 @@ namespace Sim
     extern SimOrder*  simorder_head_node; 
     // 持仓数据返回头节点
     extern SimPosition* position_head_node;
+    // 是否订阅持仓
+    extern bool is_subscribe_position;
+    // 是否订阅订单信息
+    extern bool is_subscribe_order;
+
 
     // 数据初始化
     void initial_generator_data();
     // 订单模拟成交
     // 返回成交记录链表的起始节点指针
     void simulate_trade(const SimTickTrade* ticktrade);
-    // // 查找某个股票的最新成交信息 若未找到 返回NULL
-    // SimTickTrade* get_lastest_ticktrade(const char* code);
-    // // 查找某个股票的最新成交信息 若未找到 返回NULL
-    // SimTickTrade* get_lastest_ticktrade(const int codenum);
+    // 订阅已报单信息
+    void subscribe_order();
+    // 订阅持仓信息
+    void subscribe_position();
     // 模拟成交 返回成交信息并修改订单的成交状态 若未成交返回NULL
     SimTickTrade* simulate_trade(const SimTickTrade* ticktrade, SimOrder* order);
     // 模拟撤单 返回成交信息并修改订单的成交状态 若撤单失败返回NULL

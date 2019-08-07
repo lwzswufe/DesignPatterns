@@ -57,7 +57,6 @@ int MyTradeApi::QueryOrders(const QueryOrderReq *query_param)
 
 int MyTradeApi::QueryPosition(const char *ticker)
 {   
-    start_push_trade_thread();
     return 0;
 }
 
@@ -104,9 +103,11 @@ void *task_push_trade(void* arg)
     ErrorInfo errorinfo;
     TradeReport tradereport, *trade_info = &tradereport;
     OrderInfo orderinfo, *order_info = &orderinfo;
+    QueryStkPositionRsp positionrsq, *position_info=&positionrsq;
     // 本地数据指针
     const SimTradeReport* sim_tradereport;
     const SimOrder* simorder;
+    const SimPosition* simposition;
     vector<SimOrder*> traded_order_vec;
     // 线程id
     pthread_t pid = pthread_self();
@@ -117,7 +118,7 @@ void *task_push_trade(void* arg)
     }
     printf("%s start\n", __func__);
     while(Sim::quote_start)
-    {   // 遍历股票
+    {   // 检查成交回报是否有更新 撤单 成交
         while (Sim::tradereport_num < Sim::tradereport_vec.size())
         {
             sim_tradereport = Sim::tradereport_vec[Sim::tradereport_num];
@@ -126,6 +127,23 @@ void *task_push_trade(void* arg)
             spi->OnTradeEvent(trade_info);
             convert_order_struct(sim_tradereport->order, order_info);
             spi->OnOrderEvent(order_info);
+        }
+        // 订单查询推送
+        simorder = Sim::Get_Order();
+        while(simorder->next != NULL)
+        {
+            simorder = simorder->next;
+            convert_order_struct(simorder, order_info);
+            is_last = simorder->next == NULL;
+            spi->OnQueryOrder(order_info, is_last);
+        } 
+        simposition = Sim::Get_Position();
+        while(simposition->next != NULL)
+        {
+            simposition = simposition->next;
+            convert_position_struct(simposition, position_info);
+            is_last = simposition->next == NULL;
+            spi->OnQueryPosition(position_info, is_last);
         }
         sleep(1);
     }

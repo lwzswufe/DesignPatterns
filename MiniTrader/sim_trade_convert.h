@@ -11,10 +11,10 @@
 void convert_order_struct(const OrderInsertInfo* orderinsert, SimOrder* simorder);
 
 // 将模拟成交系统报单结构体转化为订单信息结构体  
-void convert_order_struct(const SimOrder* order, OrderInfo*);
+void convert_order_struct(const SimOrder* order, OrderInfo* orderinfo);
 
-// 将成交信息转化为成交通知
-// void convert_trade_struct(const SimOrder* order, const SimTickTrade* ticktrade, TradeReport* tradereport);
+// 将持仓信息转化为成交通知
+void convert_position_struct(const SimPosition* simposition, QueryStkPositionRsp* position_info);
 
 // 将成交信息转化为成交通知
 void convert_trade_struct(const SimTradeReport* simtradereport, TradeReport* tradereport);
