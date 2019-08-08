@@ -4,6 +4,7 @@
 #include "My_Trade_Api.h"
 #include "simulate_trade.h"
 #include "sim_trade_convert.h"
+#include "Strategy.h"
 
 TradeApi * TradeApi::CreateTradeApi(uint8_t client_id)
 {   
@@ -137,10 +138,12 @@ void *task_push_trade(void* arg)
             is_last = simorder->next == NULL;
             spi->OnQueryOrder(order_info, is_last);
         } 
+        // 持仓信息推送
         simposition = Sim::Get_Position();
         while(simposition->next != NULL)
         {
             simposition = simposition->next;
+            test_position(simposition);
             convert_position_struct(simposition, position_info);
             is_last = simposition->next == NULL;
             spi->OnQueryPosition(position_info, is_last);

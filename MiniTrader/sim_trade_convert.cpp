@@ -1,7 +1,33 @@
 #include "sim_trade_convert.h"
 #include <string.h>
 #include <stdio.h>
-// 将报单结构体转化为交易系统报单结构体
+
+
+void convert_order_struct(const SimOrder* simorder, OrderInsertInfo* orderinsert)
+{   
+    if (simorder == NULL || orderinsert == NULL)
+        return;
+    strncpy(orderinsert->ticker, simorder->code, SIM_CODESIZE);
+    orderinsert->price = simorder->price;
+    orderinsert->quantity = simorder->vol;
+    orderinsert->price_type = PRICE_LIMIT;
+    orderinsert->side = SIDE_BUY;
+    orderinsert->position_effect = POSITION_EFFECT_INIT;
+	orderinsert->business_type = BUSINESS_TYPE_CASH;
+    switch (simorder->exchange_id)
+    {
+    case SIM_EXCHANGE_SH:
+        orderinsert->market = MKT_SZ_A;    
+        break;
+    case SIM_EXCHANGE_SZ:
+        orderinsert->market = MKT_SH_A;
+        break;
+    default:
+        printf("error market %d in file:%s line:%d\n", simorder->exchange_id, __FILE__, __LINE__);
+    }
+}
+
+
 void convert_order_struct(const OrderInsertInfo* orderinfo, SimOrder* simorder)
 {   
     if (orderinfo == NULL || simorder == NULL)

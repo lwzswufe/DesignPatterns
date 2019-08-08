@@ -8,13 +8,13 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g")
 set(platform x64)
 
 # 为多个源文件定义别名
-set(SOURCE_FILES Read_ini.cpp My_Quote_Api_Test.cpp simulate_trade.cpp 
+set(SOURCE_FILES Read_ini.cpp simulate_test.cpp simulate_trade.cpp Strategy.cpp
     My_Quote_Api.cpp Quote_Spi.cpp sim_trade_convert.cpp read_local_quote.cpp
     My_Trade_Api.cpp Trade_Spi.cpp sim_quote_convert.cpp )
 
 # 为多个头文件定义别名
 set(HEAD_FILES Read_ini.h base_data_struct.h sim_quote_struct.h sim_quote_convert.h
-    simulate_trade.h read_local_quote.h sim_trade_struct.h sim_trade_convert.h 
+    simulate_trade.h read_local_quote.h sim_trade_struct.h sim_trade_convert.h Strategy.h
     My_Quote_Api.h Quote_Api_Struct.h Quote_Api.h Quote_Spi.h 
     My_Trade_Api.h Trade_Api_Struct.h Trade_Api.h Trade_Spi.h )
 

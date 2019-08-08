@@ -450,7 +450,7 @@ const SimTickOrder* Sim::Get_TickOrder()
         last_ptr = tickorder_ptr;
         tickorder_read_num++;
     }
-    return_ptr->next = NULL;
+    last_ptr->next = NULL;
     return return_ptr;
 }
 
@@ -498,7 +498,7 @@ const SimTickTrade* Sim::Get_TickTrade()
         last_ptr = ticktrade_ptr;
         ticktrade_read_num++;
     }
-    return_ptr->next = NULL;
+    last_ptr->next = NULL;
     return return_ptr;
 }
 
@@ -535,7 +535,7 @@ const SimSnapData* Sim::Get_SnapData()
     {   // 若未到达末尾 更新时间
         update_time_next(snapdata_ptr->data_time);
     }
-    return_ptr->next = NULL;
+    last_ptr->next = NULL;
     return return_ptr;
 }
 
@@ -572,7 +572,7 @@ const SimLevelData* Sim::Get_LevelData()
     {   // 若未到达末尾 更新时间
         update_time_next(leveldata_ptr->data_time);
     }
-    return_ptr->next = NULL;
+    last_ptr->next = NULL;
     return return_ptr;
 }
 
@@ -610,7 +610,7 @@ const SimPosition* Sim::Get_Position()
         last_ptr = position_ptr;
         position_ptr++;
     }
-    return_ptr->next = NULL;
+    last_ptr->next = NULL;
     return return_ptr;
 }
 

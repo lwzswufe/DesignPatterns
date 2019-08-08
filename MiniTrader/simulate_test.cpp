@@ -5,9 +5,9 @@ using std::cout; using std::endl;
 using std::runtime_error; 
 #include "My_Quote_Api.h"
 #include "My_Trade_Api.h"
-/* 
-g++ base_data_struct.h quote_api_struct.h Quote_api.h Quote_spi.h local_quote_struct.h read_local_quote.h local_quote_convert.h Quote_generator.h My_Quote
-*/
+#include "sim_trade_convert.h"
+#include "Strategy.h"
+
 extern int GetTimenum();
 
 int main_program()
@@ -39,6 +39,14 @@ int main_program()
         {   
             last_timenum = now_timenum;
             printf("timenum:%d\n", now_timenum);
+        }
+        while(Strategy::send_order_num > Strategy::sended_order_num)
+        {   
+            SimOrder* simorder = Strategy::user_order_ptr_arr + Strategy::sended_order_num;
+            OrderInsertInfo order_new, *orderinsert=&order_new;
+            convert_order_struct(simorder, orderinsert);
+            api_trade->InsertOrder(orderinsert);
+            Strategy::sended_order_num++;
         }
         now_timenum = GetTimenum();
     }
