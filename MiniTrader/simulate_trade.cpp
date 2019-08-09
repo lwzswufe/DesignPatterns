@@ -154,6 +154,7 @@ unsigned Sim::cancel_order(unsigned order_id)
             // 推送至订单回报
             tradereport = new SimTradeReport{order, ticktrade, NULL}; 
             tradereport_vec.push_back(tradereport);
+            printf("successful cancel order:%ld trade_seq:%ld\n", order_id, ticktrade->seq);
             break;
         default:
             printf("error cancel order_id:%u this order is error\n", order_id);
@@ -166,11 +167,14 @@ unsigned Sim::insert_order(SimOrder *order)
 {
     localorder_num++;
     order->id = localorder_num;
+    order->order_time = time_now;
     localorder_vec.push_back(order);
     int codenum = atoi(order->code);
     order_map[codenum].push_back(order);    // 在待撮合成交队列里增加订单
     SimTickOrder *new_tickorder = convert_order_struct(order, false);
     tickorder_vec.push_back(new_tickorder); // 在已发送订单数组里增加订单
+    order->seq = new_tickorder->seq;
+    printf("user insert order_id:%ld seq:%ld vol:%ld\n", order->id, order->seq, order->vol);
     return localorder_num;
 }
 
@@ -224,6 +228,7 @@ SimTickTrade *Sim::convert_order_struct(const SimOrder *order, const char tradet
     ticktrade->price = order->price;
     ticktrade->qty = order->vol - order->traded_vol;
     ticktrade->seq = latest_trade_seq;
+    ticktrade->money = ticktrade->price * ticktrade->qty;
     ticktrade->exchange_id = order->exchange_id;
     strncpy(ticktrade->code, order->code, SIM_CODESIZE);
     return ticktrade;
@@ -236,6 +241,7 @@ SimTickTrade *Sim::simulate_trade(const SimTickTrade *ticktrade, SimOrder *order
     if (order->state != SIM_ORDERSTATE_PARTTRADED && order->state != SIM_ORDERSTATE_SENDED)
         return NULL;
     SimTickTrade *new_ticktrade = NULL;
+    SimTickOrder *tickorder;
     if (order->side == SIM_ORDERSIDE_BUY)
     {
         if (ticktrade->price < order->price) // 最近一次成交价小于报单价
@@ -246,11 +252,11 @@ SimTickTrade *Sim::simulate_trade(const SimTickTrade *ticktrade, SimOrder *order
             ;
         else
             return NULL;
-        order->traded_vol = order->vol;       // 更新成交量
-        order->state = SIM_ORDERSTATE_TRADED; // 更新订单状态
-        SimTickOrder *tickorder = convert_order_struct(order, true);
+        tickorder = convert_order_struct(order, true);
         tickorder_vec.push_back(tickorder); // 为这笔交易生成一笔反向订单
         new_ticktrade = convert_order_struct(order, SIM_TRADETYPE_DEAL);
+        order->traded_vol = order->vol;       // 更新成交量
+        order->state = SIM_ORDERSTATE_TRADED; // 更新订单状态
     }
     else
     {
@@ -262,12 +268,14 @@ SimTickTrade *Sim::simulate_trade(const SimTickTrade *ticktrade, SimOrder *order
             ;
         else
             return NULL;
-        order->traded_vol = order->vol;       // 更新成交量
-        order->state = SIM_ORDERSTATE_TRADED; // 更新订单状态
-        SimTickOrder *tickorder = convert_order_struct(order, true);
+        tickorder = convert_order_struct(order, true);
         tickorder_vec.push_back(tickorder); // 为这笔交易生成一笔反向订单
         new_ticktrade = convert_order_struct(order, SIM_TRADETYPE_DEAL);
+        order->traded_vol = order->vol;       // 更新成交量
+        order->state = SIM_ORDERSTATE_TRADED; // 更新订单状态
     }
+    printf("user order traded code:%s order_id:%ld seq:%ld counterparties_seq:%ld\n", 
+            order->code, order->id, order->seq, tickorder->seq);
     return new_ticktrade;
 }
 
@@ -294,16 +302,18 @@ void Sim::simulate_trade(const SimTickTrade *ticktrade)
     int codenum = atoi(ticktrade->code);
     if (ticktrade == NULL || codenum == 0 || Sim::order_map[codenum].empty())
         return;
-    // 倒序遍历订单 方便删除
-    size_t order_num = Sim::order_map[codenum].size();
-    for (unsigned i = order_num - 1; i >= 0; i--)
+
+    deque<SimOrder*> &order_deque = Sim::order_map[codenum];
+    size_t order_num = order_deque.size();
+    bool is_change = false;
+    for (int i = 0; i < order_num; i++)
     { // 模拟成交
-        SimOrder *simorder = Sim::order_map[codenum][i];
+        SimOrder *simorder = order_deque[i];
         // 检查订单状态
-        if (simorder->state != SIM_ORDERSTATE_SENDED || simorder->state != SIM_ORDERSTATE_PARTTRADED)
+        if (simorder->state != SIM_ORDERSTATE_SENDED && simorder->state != SIM_ORDERSTATE_PARTTRADED)
         {
-            // 从待匹配成交队列里删除这笔订单
-            Sim::order_map[codenum].erase(Sim::order_map[codenum].begin() + i);
+            // 如果订单不是待成交 部分成交的状态 从待匹配成交队列里删除这笔订单
+            is_change = true;
             continue;
         }
         SimTickTrade *new_ticktrade = simulate_trade(ticktrade, simorder);
@@ -313,8 +323,21 @@ void Sim::simulate_trade(const SimTickTrade *ticktrade)
             ticktrade_vec.push_back(new_ticktrade);
             // 储存订单成交信息
             SimTradeReport *new_tradereport_ptr = new SimTradeReport{simorder, new_ticktrade, NULL};
-            // 从待匹配成交队列里删除这笔订单
-            Sim::order_map[codenum].erase(Sim::order_map[codenum].begin() + i);
+            is_change = true;
+        }
+    }
+    if (!is_change)
+        return;
+    // 倒序遍历订单 方便删除
+    for (int i = order_num - 1; i >= 0; i--)
+    {
+        SimOrder *simorder = order_deque[i];
+        // 检查订单状态
+        if (simorder->state != SIM_ORDERSTATE_SENDED && simorder->state != SIM_ORDERSTATE_PARTTRADED)
+        {
+            // 如果订单不是待成交 部分成交的状态 从待匹配成交队列里删除这笔订单
+            order_deque.erase(order_deque.begin() + i);
+            continue;
         }
     }
 }
@@ -411,7 +434,18 @@ const SimTickOrder* Sim::Get_TickOrder()
 {   
     SimTickOrder* return_ptr = tickorder_head_node, *last_ptr = return_ptr;
     return_ptr->next = NULL;
-    SimTickOrder* tickorder_ptr = (SimTickOrder*) tickorder_manager->current;
+    SimTickOrder* tickorder_ptr = NULL;
+
+    // 读取新生成的订单数据
+    while (tickorder_read_num < tickorder_vec.size())
+    {   
+        tickorder_ptr = tickorder_vec[tickorder_read_num];
+        last_ptr->next = tickorder_ptr;
+        last_ptr = tickorder_ptr;
+        tickorder_read_num++;
+    }
+    // 开始读取本地行情订单数据
+    tickorder_ptr = (SimTickOrder*) tickorder_manager->current;
     if (tickorder_ptr == NULL)
     {   // 数据未初始化
         return return_ptr;
@@ -427,6 +461,7 @@ const SimTickOrder* Sim::Get_TickOrder()
         printf("release SimTickOrder Array\n");
         return return_ptr;
     }
+    // 读取本地行情订单数据
     while (tickorder_ptr != tickorder_manager->end &&
            tickorder_ptr->data_time <= time_now)
     {   // 若当前数据时间小于等于系统时间 就返回当前指针 再++当前指针   
@@ -441,14 +476,6 @@ const SimTickOrder* Sim::Get_TickOrder()
     if (tickorder_ptr != tickorder_manager->end)
     {   // 若未到达末尾 更新时间
         update_time_next(tickorder_ptr->data_time);
-    }
-    // 读取新生成的成交数据
-    while (tickorder_read_num < tickorder_vec.size())
-    {   
-        tickorder_ptr = tickorder_vec[tickorder_read_num];
-        last_ptr->next = tickorder_ptr;
-        last_ptr = tickorder_ptr;
-        tickorder_read_num++;
     }
     last_ptr->next = NULL;
     return return_ptr;

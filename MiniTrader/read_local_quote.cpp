@@ -560,7 +560,7 @@ bool read_tick_order_from_line(char* line, SimTickOrder* ptr)
     sscanf(line, "%ld", &(ptr->data_time));
     // 跳过时间字段
     line += 72;
-    match_num = sscanf(line, "%*d\t%*d\t%ld\t%d\t%*d\t%lf\t%ld\t%c\t%c",
+    match_num = sscanf(line, "%*d\t%*d\t%ld\t%d\t%*d\t%lf\t%ld\t%*ld\t%c\t%c",
                         &(ptr->seq), &codenum, &(ptr->price), &(ptr->qty), &(ptr->side), &(ptr->type));
     ptr->seq *= QUOTE_SEQ_MULTIPLE;
     if (match_num < 6)

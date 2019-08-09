@@ -143,7 +143,7 @@ void *task_push_trade(void* arg)
         while(simposition->next != NULL)
         {
             simposition = simposition->next;
-            test_position(simposition);
+            // test_position(simposition);
             convert_position_struct(simposition, position_info);
             is_last = simposition->next == NULL;
             spi->OnQueryPosition(position_info, is_last);

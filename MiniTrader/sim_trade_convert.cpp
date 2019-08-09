@@ -40,6 +40,7 @@ void convert_order_struct(const OrderInsertInfo* orderinfo, SimOrder* simorder)
     simorder->id = 0;
     simorder->account_id = 0;
     simorder->order_time = 0.0;
+    simorder->type = SIM_ORDERTYPE_LIMIT;
     strncpy(simorder->code, orderinfo->ticker, SIM_CODESIZE);
     switch (orderinfo->market)
     {

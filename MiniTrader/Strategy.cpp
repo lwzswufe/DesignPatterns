@@ -23,7 +23,9 @@ void Strategy::march_order(const SimTickOrder* tickorder)
 {
     if (march_order_num >= send_order_num)
         return;
-    const SimOrder* simorder = user_order_ptr_arr + send_order_num;
+    const SimOrder* simorder = user_order_ptr_arr + march_order_num;
+    // if (tickorder->seq > 4920 && tickorder->seq < 11000)
+    //     printf("seq:%ld\n", tickorder->seq);
     if (tickorder->side == SIM_ORDERSIDE_BUY &&
         tickorder->type == SIM_ORDERTYPE_LIMIT &&
         tickorder->price == simorder->price &&
@@ -31,7 +33,7 @@ void Strategy::march_order(const SimTickOrder* tickorder)
         strcmp(tickorder->code, simorder->code) == 0)
     {   
         march_order_num++;
-        printf("successful match order:%d\n", march_order_num);
+        printf("successful match order:%d seq:%ld\n", march_order_num, tickorder->seq);
     }
 }
 
@@ -41,7 +43,7 @@ void Strategy::send_order(const SimTickOrder* tickorder)
         return;
     if (tickorder->side == SIM_ORDERSIDE_BUY &&
         tickorder->type == SIM_ORDERTYPE_LIMIT &&
-        tickorder->qty >= 8 * 10000 )
+        tickorder->qty >= 80 * 10000 )
     {   
         SimOrder* simorder = user_order_ptr_arr + send_order_num;
         memset(simorder, 0, sizeof(SimOrder));

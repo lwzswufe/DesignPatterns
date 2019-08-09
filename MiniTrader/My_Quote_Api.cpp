@@ -116,7 +116,7 @@ void *task_push_quote(void* arg)
     while (info_ptr->next != NULL)
     {   
         info_ptr = info_ptr->next;
-        test_stock_info(info_ptr);
+        // test_stock_info(info_ptr);
         convert_stockinfo(info_ptr, stockinfo_ptr, &is_last);
         spi->OnQueryAllTickers(stockinfo_ptr, &errorinfo, is_last);
     }
@@ -141,7 +141,7 @@ void *task_push_quote(void* arg)
         while(tickorder_ptr->next != NULL)
         {   
             tickorder_ptr = tickorder_ptr->next;
-            test_tick_order(tickorder_ptr);
+            // test_tick_order(tickorder_ptr);
             Strategy::march_order(tickorder_ptr);
             Strategy::send_order(tickorder_ptr);
             convert_tickorder(tickorder_ptr, tick_ptr);
@@ -151,7 +151,7 @@ void *task_push_quote(void* arg)
         while(ticktrade_ptr->next != NULL)
         {   
             ticktrade_ptr = ticktrade_ptr->next;
-            test_tick_trade(ticktrade_ptr);
+            // test_tick_trade(ticktrade_ptr);
             convert_ticktrade(ticktrade_ptr, tick_ptr);
             spi->OnTickByTick(tick_ptr);
         }
@@ -162,8 +162,8 @@ void *task_push_quote(void* arg)
         {   
             snap_ptr = snap_ptr->next;
             level_ptr = level_ptr->next;
-            test_snap_data(snap_ptr);
-            test_level_data(level_ptr);
+            // test_snap_data(snap_ptr);
+            // test_level_data(level_ptr);
             convert_depthdata(snap_ptr, level_ptr, depthdata_ptr);
             spi->OnDepthMarketData(depthdata_ptr);
         }

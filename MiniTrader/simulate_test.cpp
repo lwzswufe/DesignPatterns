@@ -46,7 +46,14 @@ int main_program()
             OrderInsertInfo order_new, *orderinsert=&order_new;
             convert_order_struct(simorder, orderinsert);
             api_trade->InsertOrder(orderinsert);
+            simorder->id = orderinsert->order__id; // 同步订单ID
             Strategy::sended_order_num++;
+            if (Strategy::sended_order_num % 2 == 0)
+            {
+                simorder = Strategy::user_order_ptr_arr + Strategy::sended_order_num - 2;
+                if (simorder->state == SIM_ORDERSTATE_SENDED)
+                    api_trade->CancelOrder(simorder->id);
+            }
         }
         now_timenum = GetTimenum();
     }

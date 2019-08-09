@@ -87,6 +87,7 @@ void test_tick_order(const char * filename)
     int data_num = 0, flag = 1;
     SimDataManager* data_manager = read_tick_order_from_file(filename, NULL);
     SimTickOrder* ptr = (SimTickOrder*) data_manager->begin;
+    int64_t last_time = 0;
     while (ptr != data_manager->end)
     {   
         data_num++;
@@ -96,6 +97,11 @@ void test_tick_order(const char * filename)
             printf("line:%08d code:%s Market:%d seq:%09ld price:%.2lf vol:%ld side:%c type:%c\n", data_num, 
             ptr->code, ptr->exchange_id, ptr->seq, ptr->price, ptr->qty, ptr->side, ptr->type);
         }
+        if (ptr->data_time < last_time)
+        {
+            printf("error time:%ld last_time:%ld\n", ptr->data_time, last_time);
+        }
+        last_time = ptr->data_time;
         ptr++;
     }
     printf("tickorder_num:%d\n", data_num);
