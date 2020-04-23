@@ -2,11 +2,14 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Make Linux",
+            "label": "Make MiniTrader",
             "type": "shell",
             "command": "cd",
             "args": [
-                "${fileDirname}",
+                "${workspaceFolder}/MiniTrader/build",
+                "&&",
+                "make",
+                "clean",
                 "&&",
                 "make"
             ],

@@ -1,19 +1,19 @@
-#include "local_quote_convert.h"
+#include "sim_quote_convert.h"
 #include <string.h>
 
-void convert_stockinfo(const StockInfo* stockinfo_ptr, StockStaticInfo * stockstaticinfo_ptr, bool* is_last)
+void convert_stockinfo(const SimStockInfo* stockinfo_ptr, StockStaticInfo * stockstaticinfo_ptr, bool* is_last)
 {   
     // 交易所
     switch(stockinfo_ptr->exchange_id)
     {
-        case STOCK_EXCHANGE_SZ: stockstaticinfo_ptr->exchange_id=EXCHANGE_SZ; break;
-        case STOCK_EXCHANGE_SH: stockstaticinfo_ptr->exchange_id=EXCHANGE_SH; break;
+        case SIM_EXCHANGE_SZ: stockstaticinfo_ptr->exchange_id=EXCHANGE_SZ; break;
+        case SIM_EXCHANGE_SH: stockstaticinfo_ptr->exchange_id=EXCHANGE_SH; break;
         default:                stockstaticinfo_ptr->exchange_id=EXCHANGE_UNKNOWN;
     }
     // 合约代码
-    strncpy(stockstaticinfo_ptr->ticker, stockinfo_ptr->code, LOCAL_CODESOZE);
+    strncpy(stockstaticinfo_ptr->ticker, stockinfo_ptr->code, SIM_CODESIZE);
     // 合约名称
-    strncpy(stockstaticinfo_ptr->ticker_name, stockinfo_ptr->name, LOCAL_NAMESIZE);
+    strncpy(stockstaticinfo_ptr->ticker_name, stockinfo_ptr->name, SIM_NAMESIZE);
     // 昨收盘
     stockstaticinfo_ptr->pre_close_price = stockinfo_ptr->pre_close_price;
     // 涨停板价
@@ -23,26 +23,24 @@ void convert_stockinfo(const StockInfo* stockinfo_ptr, StockStaticInfo * stockst
 	// 最小变动价位
 	stockstaticinfo_ptr->price_tick = 0.01;
 
-    stockinfo_ptr += 1;
-
-    if (stockinfo_ptr->pre_close_price > 0)
+    if (stockinfo_ptr->next != NULL)
         *is_last = false;
     else
         *is_last = true;
 }
 
 // 转换深度行情数据
-void convert_depthdata(const SnapData* snap_ptr, LevelData* level_ptr, DepthData * data_ptr)
+void convert_depthdata(const SimSnapData* snap_ptr, const SimLevelData* level_ptr, DepthData * data_ptr)
 {
     // 交易所
     switch(snap_ptr->exchange_id)
     {
-        case STOCK_EXCHANGE_SZ: data_ptr->exchange_id=EXCHANGE_SZ; break;
-        case STOCK_EXCHANGE_SH: data_ptr->exchange_id=EXCHANGE_SH; break;
-        default:                data_ptr->exchange_id=EXCHANGE_UNKNOWN;
+        case SIM_EXCHANGE_SZ: data_ptr->exchange_id=EXCHANGE_SZ; break;
+        case SIM_EXCHANGE_SH: data_ptr->exchange_id=EXCHANGE_SH; break;
+        default:              data_ptr->exchange_id=EXCHANGE_UNKNOWN;
     }
     // 合约代码
-    strncpy(data_ptr->ticker, snap_ptr->code, LOCAL_CODESOZE);
+    strncpy(data_ptr->ticker, snap_ptr->code, SIM_CODESIZE);
 
     // 价格
 	// 最新价
@@ -101,24 +99,24 @@ void convert_depthdata(const SnapData* snap_ptr, LevelData* level_ptr, DepthData
 }
 
 // 转换委托流数据
-void convert_tickorder(const TickOrder* tickorder_ptr, TickByTickStruct * tick_ptr)
-{
+void convert_tickorder(const SimTickOrder* tickorder_ptr, TickByTickStruct * tick_ptr)
+{   
     // 交易所
     switch(tickorder_ptr->exchange_id)
     {
-        case STOCK_EXCHANGE_SZ: tick_ptr->exchange_id=EXCHANGE_SZ; break;
-        case STOCK_EXCHANGE_SH: tick_ptr->exchange_id=EXCHANGE_SH; break;
+        case SIM_EXCHANGE_SZ: tick_ptr->exchange_id=EXCHANGE_SZ; break;
+        case SIM_EXCHANGE_SH: tick_ptr->exchange_id=EXCHANGE_SH; break;
         default:                tick_ptr->exchange_id=EXCHANGE_UNKNOWN;
     }
     // 合约代码
-    strncpy(tick_ptr->ticker, tickorder_ptr->code, LOCAL_CODESOZE);
+    strncpy(tick_ptr->ticker, tickorder_ptr->code, SIM_CODESIZE);
 
     // 委托时间 or 成交时间
     tick_ptr->data_time = tickorder_ptr->data_time;
     // 委托 or 成交
     tick_ptr->type = TBT_ENTRUST;
     ///委托序号(在同一个channel_no内唯一，从1开始连续)
-    tick_ptr->order.seq = tick_ptr->seq;
+    tick_ptr->order.seq = tickorder_ptr->seq;
     ///委托价格
     tick_ptr->order.price = tickorder_ptr->price;
     ///委托数量
@@ -130,24 +128,24 @@ void convert_tickorder(const TickOrder* tickorder_ptr, TickByTickStruct * tick_p
 }
 
 // 转换成交流数据
-void convert_ticktrade(const TickTrade* ticktrade_ptr, TickByTickStruct * tick_ptr)
+void convert_ticktrade(const SimTickTrade* ticktrade_ptr, TickByTickStruct * tick_ptr)
 {
         // 交易所
     switch(ticktrade_ptr->exchange_id)
     {
-        case STOCK_EXCHANGE_SZ: tick_ptr->exchange_id=EXCHANGE_SZ; break;
-        case STOCK_EXCHANGE_SH: tick_ptr->exchange_id=EXCHANGE_SH; break;
+        case SIM_EXCHANGE_SZ: tick_ptr->exchange_id=EXCHANGE_SZ; break;
+        case SIM_EXCHANGE_SH: tick_ptr->exchange_id=EXCHANGE_SH; break;
         default:                tick_ptr->exchange_id=EXCHANGE_UNKNOWN;
     }
     // 合约代码
-    strncpy(tick_ptr->ticker, ticktrade_ptr->code, LOCAL_CODESOZE);
+    strncpy(tick_ptr->ticker, ticktrade_ptr->code, SIM_CODESIZE);
 
     // 委托时间 or 成交时间
     tick_ptr->data_time = ticktrade_ptr->data_time;
     // 委托 or 成交
     tick_ptr->type = TBT_TRADE;
     // 成交序号(在同一个channel_no内唯一，从1开始连续)
-    tick_ptr->trade.seq = tick_ptr->seq;
+    tick_ptr->trade.seq = ticktrade_ptr->seq;
     // 成交价格
     tick_ptr->trade.price = ticktrade_ptr->price;
     // 成交数量
